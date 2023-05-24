@@ -1,6 +1,7 @@
 import recorder
 from Coqui import sampleClient
 import re
+from Whisper import client
 
 
 palmTree = {
@@ -77,7 +78,10 @@ if __name__ == "__main__":
         userInput = sampleClient.speech_to_text(
             "recording.wav", "Coqui/model.tflite", "Coqui/large_vocabulary.scorer"
         )
-        print(f"User input is '{userInput}'")
+        user_input_whisper = client.speech_to_text("recording.wav", "small.en")
+        print(f"Coqui: '{userInput}'\n"
+              f"Whisper: '{user_input_whisper}'")
+
 
 
         # Try to match the recorded audio with one of the expected responses
