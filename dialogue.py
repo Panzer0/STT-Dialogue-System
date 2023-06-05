@@ -60,8 +60,7 @@ def containsWord(string, word):
 def containsAny(string, words):
     return any(containsWord(string, word) for word in words)
 
-
-if __name__ == "__main__":
+if __name__ == "__main__":    
     while True:
         input(
             "Press enter to proceed, then say one of the following to choose tree type or abort:\n"
@@ -75,23 +74,27 @@ if __name__ == "__main__":
         recorder.record_audio(5, 16_000)
 
         # Convert the recorded audio into text
-        userInput = sampleClient.speech_to_text(
+        results = dict()
+        print("Analysing via coqui...")
+        results["coqui"] = sampleClient.speech_to_text(
             "recording.wav", "Coqui/model.tflite", "Coqui/large_vocabulary.scorer"
         )
-        user_input_whisper = client.speech_to_text("recording.wav", "small.en")
-        print(f"Coqui: '{userInput}'\n"
-              f"Whisper: '{user_input_whisper}'")
+        print("Analysing via whisper...")
+        results['whisper'] = client.speech_to_text("recording.wav", "small.en")
+        print(f"Coqui: '{results['coqui']}'\n"
+              f"Whisper: '{results['whisper']}'")
 
+        print("Done!")
 
 
         # Try to match the recorded audio with one of the expected responses
-        if containsAny(userInput, palm_words):
+        if containsAny(results["coqui"], palm_words):
             selection = palmTree
-        elif containsAny(userInput, evergreen_words):
+        elif containsAny(results["coqui"], evergreen_words):
             selection = evergreenTree
-        elif containsAny(userInput, deciduous_words):
+        elif containsAny(results["coqui"], deciduous_words):
             selection = deciduousTree
-        elif containsAny(userInput, stop_words):
+        elif containsAny(results["coqui"], stop_words):
             print("Break!")
             break
         else:

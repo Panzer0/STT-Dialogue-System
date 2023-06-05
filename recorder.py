@@ -23,7 +23,7 @@ def record_audio(length, fs):
     recording = sd.rec(duration, samplerate=fs, channels=1, blocking=False)
 
     try:
-        while input("Type 'Stop' to stop the recording: ") != "Stop":
+        while input("Type 'stop' to stop the recording: ").lower() != "stop":
             pass
     except KeyboardInterrupt:
         pass
