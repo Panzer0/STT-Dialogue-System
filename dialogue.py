@@ -89,7 +89,8 @@ if __name__ == "__main__":
 
         print("Analysing via SpeechBrain...")
         sb_model = EncoderDecoderASR.from_hparams(
-            "speechbrain/asr-transformer-transformerlm-librispeech"
+            "speechbrain/asr-transformer-transformerlm-librispeech", 
+            run_opts={"device":"cuda"} 
         )
         results["speech_brain"] = sb_model.transcribe_file("recording.wav")
 
