@@ -62,7 +62,16 @@ def containsWord(string, word):
 def containsAny(string, words):
     return any(containsWord(string, word) for word in words)
 
-
+def match_results(results):
+    if containsAny(results, palm_words):
+        return palmTree
+    elif containsAny(results, evergreen_words):
+        return evergreenTree
+    elif containsAny(results, deciduous_words):
+        return deciduousTree
+    elif containsAny(results, stop_words):
+        return "STOP"
+    return None
 
 
 if __name__ == "__main__":
@@ -108,23 +117,17 @@ if __name__ == "__main__":
         sb_time = end_time - start_time
 
         print(
-            f"Coqui: '{results['coqui']} in {coqui_time}'\n"
-            f"Whisper: '{results['whisper']} in {whisper_time}'\n"
-            f"SpeechBrain: '{results['speech_brain']} in {sb_time}'"
+            f"Coqui: '{results['coqui']}' in {coqui_time}\n"
+            f"Whisper: '{results['whisper']}' in {whisper_time}\n"
+            f"SpeechBrain: '{results['speech_brain']}' in {sb_time}"
         )
 
         # Try to match the recorded audio with one of the expected responses
-        if containsAny(results["coqui"], palm_words):
-            selection = palmTree
-        elif containsAny(results["coqui"], evergreen_words):
-            selection = evergreenTree
-        elif containsAny(results["coqui"], deciduous_words):
-            selection = deciduousTree
-        elif containsAny(results["coqui"], stop_words):
-            print("Break!")
+        selection = match_results(results['whisper'])
+        
+        if selection == "STOP":
             break
-        else:
-            print(f"\nUnrecognised command. Try again.\n")
+        elif selection is None:
+            print("Unrecognised command. Please, try again.")
             continue
-
         print(selection["emoji"])
