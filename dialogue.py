@@ -1,6 +1,7 @@
 import recorder
 from Coqui import sampleClient
 import re
+import time
 from Whisper import client
 from speechbrain.pretrained import EncoderDecoderASR
 
@@ -62,6 +63,8 @@ def containsAny(string, words):
     return any(containsWord(string, word) for word in words)
 
 
+
+
 if __name__ == "__main__":
     while True:
         input(
@@ -77,29 +80,38 @@ if __name__ == "__main__":
 
         # Convert the recorded audio into text
         results = dict()
-        print("Analysing via coqui...")
+
+        print("\nAnalysing via coqui...")
+        start_time = time.time()
         results["coqui"] = sampleClient.speech_to_text(
             "recording.wav",
             "Coqui/model.tflite",
             "Coqui/large_vocabulary.scorer",
         )
+        end_time = time.time()
+        coqui_time = end_time - start_time
 
-        print("Analysing via whisper...")
+        print("\nAnalysing via whisper...")
+        start_time = time.time()
         results["whisper"] = client.speech_to_text("recording.wav", "small.en")
+        end_time = time.time()
+        whisper_time = end_time - start_time
 
-        print("Analysing via SpeechBrain...")
+        print("\nAnalysing via SpeechBrain...")
+        start_time = time.time()
         sb_model = EncoderDecoderASR.from_hparams(
             "speechbrain/asr-transformer-transformerlm-librispeech", 
             run_opts={"device":"cuda"} 
         )
         results["speech_brain"] = sb_model.transcribe_file("recording.wav")
+        end_time = time.time()
+        sb_time = end_time - start_time
 
         print(
-            f"Coqui: '{results['coqui']}'\n"
-            f"Whisper: '{results['whisper']}'\n"
-            f"SpeechBrain: '{results['speech_brain']}'"
+            f"Coqui: '{results['coqui']} in {coqui_time}'\n"
+            f"Whisper: '{results['whisper']} in {whisper_time}'\n"
+            f"SpeechBrain: '{results['speech_brain']} in {sb_time}'"
         )
-        print("Done!")
 
         # Try to match the recorded audio with one of the expected responses
         if containsAny(results["coqui"], palm_words):
