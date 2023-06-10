@@ -1,33 +1,34 @@
 import recorder
 from Coqui import sampleClient
 import re
+import time
 from Whisper import client
+from speechbrain.pretrained import EncoderDecoderASR
 
 
 palmTree = {
     "name": "Palm Tree",
-    "definition":
-        "An unbranched evergreen tree of tropical and warm regions, "
-        "with a crown of very long feathered or fan-shaped leaves, "
-        "and typically having old leaf scars forming a regular "
-        "pattern on the trunk.",
+    "definition": "An unbranched evergreen tree of tropical and warm regions, "
+    "with a crown of very long feathered or fan-shaped leaves, "
+    "and typically having old leaf scars forming a regular "
+    "pattern on the trunk.",
     "emoji": "🌴",
 }
 evergreenTree = {
     "name": "Evergreen Tree",
     "definition": "an evergreen coniferous tree which has clusters "
-                  "of long needle-shaped leaves. Many kinds are grown "
-                  "for the soft timber, which is widely used for "
-                  "furniture and pulp, or for tar and turpentine.",
+    "of long needle-shaped leaves. Many kinds are grown "
+    "for the soft timber, which is widely used for "
+    "furniture and pulp, or for tar and turpentine.",
     "emoji": "🌲",
 }
 deciduousTree = {
     "name": "Deciduous  Tree",
     "definition": "A deciduous tree is a type of tree that loses its "
-                  "leaves seasonally. In the autumn, the leaves of "
-                  "deciduous trees change color and then fall off, "
-                  "leaving the tree without leaves for the winter. "
-                  "In the spring, the tree begins to grow new leaves.",
+    "leaves seasonally. In the autumn, the leaves of "
+    "deciduous trees change color and then fall off, "
+    "leaving the tree without leaves for the winter. "
+    "In the spring, the tree begins to grow new leaves.",
     "emoji": "🌳",
 }
 
@@ -53,6 +54,7 @@ deciduous_words = [
 ]
 stop_words = ["four", "fourth", "stop", "abort"]
 
+
 def containsWord(string, word):
     return re.search(r"\b" + word + r"\b", string)
 
@@ -60,7 +62,19 @@ def containsWord(string, word):
 def containsAny(string, words):
     return any(containsWord(string, word) for word in words)
 
-if __name__ == "__main__":    
+def match_results(results):
+    if containsAny(results, palm_words):
+        return palmTree
+    elif containsAny(results, evergreen_words):
+        return evergreenTree
+    elif containsAny(results, deciduous_words):
+        return deciduousTree
+    elif containsAny(results, stop_words):
+        return "STOP"
+    return None
+
+
+if __name__ == "__main__":
     while True:
         input(
             "Press enter to proceed, then say one of the following to choose tree type or abort:\n"
@@ -75,30 +89,45 @@ if __name__ == "__main__":
 
         # Convert the recorded audio into text
         results = dict()
-        print("Analysing via coqui...")
+
+        print("\nAnalysing via coqui...")
+        start_time = time.time()
         results["coqui"] = sampleClient.speech_to_text(
-            "recording.wav", "Coqui/model.tflite", "Coqui/large_vocabulary.scorer"
+            "recording.wav",
+            "Coqui/model.tflite",
+            "Coqui/large_vocabulary.scorer",
         )
-        print("Analysing via whisper...")
-        results['whisper'] = client.speech_to_text("recording.wav", "small.en")
-        print(f"Coqui: '{results['coqui']}'\n"
-              f"Whisper: '{results['whisper']}'")
+        end_time = time.time()
+        coqui_time = end_time - start_time
 
-        print("Done!")
+        print("\nAnalysing via whisper...")
+        start_time = time.time()
+        results["whisper"] = client.speech_to_text("recording.wav", "small.en")
+        end_time = time.time()
+        whisper_time = end_time - start_time
 
+        print("\nAnalysing via SpeechBrain...")
+        start_time = time.time()
+        sb_model = EncoderDecoderASR.from_hparams(
+            "speechbrain/asr-transformer-transformerlm-librispeech", 
+            run_opts={"device":"cuda"} 
+        )
+        results["speech_brain"] = sb_model.transcribe_file("recording.wav")
+        end_time = time.time()
+        sb_time = end_time - start_time
+
+        print(
+            f"Coqui: '{results['coqui']}' in {coqui_time}\n"
+            f"Whisper: '{results['whisper']}' in {whisper_time}\n"
+            f"SpeechBrain: '{results['speech_brain']}' in {sb_time}"
+        )
 
         # Try to match the recorded audio with one of the expected responses
-        if containsAny(results["coqui"], palm_words):
-            selection = palmTree
-        elif containsAny(results["coqui"], evergreen_words):
-            selection = evergreenTree
-        elif containsAny(results["coqui"], deciduous_words):
-            selection = deciduousTree
-        elif containsAny(results["coqui"], stop_words):
-            print("Break!")
+        selection = match_results(results['whisper'])
+        
+        if selection == "STOP":
             break
-        else:
-            print(f"\nUnrecognised command. Try again.\n")
+        elif selection is None:
+            print("Unrecognised command. Please, try again.")
             continue
-
         print(selection["emoji"])
