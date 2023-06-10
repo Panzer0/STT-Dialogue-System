@@ -130,9 +130,9 @@ if __name__ == "__main__":
         # Try to match the recorded audio with one of the expected responses
         selection = match_results(results['whisper'], OPTIONS)
         
-        if selection.definition["name"] == "Stop":
-            break
-        elif selection is None:
+        if selection is None:
             print("Unrecognised command. Please, try again.")
             continue
+        elif selection.definition["name"] == "Stop":
+            break
         print(selection.definition["emoji"])
