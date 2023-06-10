@@ -1,11 +1,11 @@
-import recorder
-from Coqui import sampleClient
-import re
 import time
 
+from speechbrain.pretrained import EncoderDecoderASR
+
+import recorder
+from Coqui import sampleClient
 from DialogueOption import DialogueOption
 from Whisper import client
-from speechbrain.pretrained import EncoderDecoderASR
 
 
 palm_def = {
