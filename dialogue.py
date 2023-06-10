@@ -2,47 +2,54 @@ import recorder
 from Coqui import sampleClient
 import re
 import time
+
+from DialogueOption import DialogueOption
 from Whisper import client
 from speechbrain.pretrained import EncoderDecoderASR
 
 
-palmTree = {
+palm_def = {
     "name": "Palm Tree",
     "definition": "An unbranched evergreen tree of tropical and warm regions, "
     "with a crown of very long feathered or fan-shaped leaves, "
     "and typically having old leaf scars forming a regular "
     "pattern on the trunk.",
-    "emoji": "🌴",
+    "emoji": "🌴"
 }
-evergreenTree = {
+evergreen_def = {
     "name": "Evergreen Tree",
     "definition": "an evergreen coniferous tree which has clusters "
     "of long needle-shaped leaves. Many kinds are grown "
     "for the soft timber, which is widely used for "
     "furniture and pulp, or for tar and turpentine.",
-    "emoji": "🌲",
+    "emoji": "🌲"
 }
-deciduousTree = {
+deciduous_def = {
     "name": "Deciduous  Tree",
     "definition": "A deciduous tree is a type of tree that loses its "
     "leaves seasonally. In the autumn, the leaves of "
     "deciduous trees change color and then fall off, "
     "leaving the tree without leaves for the winter. "
     "In the spring, the tree begins to grow new leaves.",
-    "emoji": "🌳",
+    "emoji": "🌳"
 }
 
-palm_words = ["one", "on", "first", "palm"]
-evergreen_words = [
+stop_def = {
+    "name": "Stop"
+}
+
+palm_words = {"one", "on", "first", "palm"}
+evergreen_words = {
     "two",
     "to",
     "too",
     "second",
     "evergreen",
     "pine",
-    "pain",
-]
-deciduous_words = [
+    "pain"
+}
+
+deciduous_words = {
     "three",
     "tree",
     "he",
@@ -50,27 +57,25 @@ deciduous_words = [
     "third",
     "deciduous",
     "leaf",
-    "live",
-]
-stop_words = ["four", "fourth", "stop", "abort"]
+    "live"}
+
+stop_words = {"four", "fourth", "stop", "abort"}
+
+palm_option = DialogueOption(palm_words, palm_def)
+evergreen_option = DialogueOption(evergreen_words, evergreen_def)
+deciduous_option = DialogueOption(deciduous_words, deciduous_def)
+stop_option = DialogueOption(stop_words, stop_def)
+
+OPTIONS = {palm_option, evergreen_option, deciduous_option, stop_option}
 
 
-def containsWord(string, word):
-    return re.search(r"\b" + word + r"\b", string)
 
 
-def containsAny(string, words):
-    return any(containsWord(string, word) for word in words)
 
-def match_results(results):
-    if containsAny(results, palm_words):
-        return palmTree
-    elif containsAny(results, evergreen_words):
-        return evergreenTree
-    elif containsAny(results, deciduous_words):
-        return deciduousTree
-    elif containsAny(results, stop_words):
-        return "STOP"
+def match_results(results, options: set[DialogueOption]):
+    for option in options:
+        if option.is_mentioned(results):
+            return option
     return None
 
 
@@ -123,11 +128,11 @@ if __name__ == "__main__":
         )
 
         # Try to match the recorded audio with one of the expected responses
-        selection = match_results(results['whisper'])
+        selection = match_results(results['whisper'], OPTIONS)
         
-        if selection == "STOP":
+        if selection.definition["name"] == "Stop":
             break
         elif selection is None:
             print("Unrecognised command. Please, try again.")
             continue
-        print(selection["emoji"])
+        print(selection.definition["emoji"])
