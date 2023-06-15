@@ -31,3 +31,8 @@ def record_audio(length, fs):
     print("Recording stopped")
     recording = recording / max(abs(recording)) * MAX_SHORT_INT
     save_audio(recording, fs)
+
+if __name__ == "__main__":
+    record_audio(6, 16000)
+    print("I am recorder's main")
+
