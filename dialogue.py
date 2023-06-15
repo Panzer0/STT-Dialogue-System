@@ -3,7 +3,7 @@ import time
 from speechbrain.pretrained import EncoderDecoderASR
 
 import recorder
-from Coqui import sampleClient
+from Coqui.CoquiClient import CoquiClient
 from DialogueOption import DialogueOption
 from Whisper import client
 
@@ -80,6 +80,8 @@ def match_results(results, options: set[DialogueOption]):
 
 
 if __name__ == "__main__":
+    coqui_client = CoquiClient("Coqui/model.tflite", "Coqui/large_vocabulary.scorer")
+
     while True:
         input(
             "Press enter to proceed, then say one of the following to choose tree type or abort:\n"
@@ -97,11 +99,7 @@ if __name__ == "__main__":
 
         print("\nAnalysing via coqui...")
         start_time = time.time()
-        results["coqui"] = sampleClient.speech_to_text(
-            "recording.wav",
-            "Coqui/model.tflite",
-            "Coqui/large_vocabulary.scorer",
-        )
+        results["coqui"] = coqui_client.speech_to_text("recording.wav")
         end_time = time.time()
         coqui_time = end_time - start_time
 
