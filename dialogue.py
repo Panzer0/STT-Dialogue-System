@@ -1,11 +1,11 @@
 import time
 
-from speechbrain.pretrained import EncoderDecoderASR
 
 import recorder
-from Coqui import sampleClient
+from Coqui.CoquiClient import CoquiClient
+from Whisper.WhisperClient import WhisperClient
+from SpeechBrain.SBClient import SBClient
 from DialogueOption import DialogueOption
-from Whisper import client
 
 
 palm_def = {
@@ -80,6 +80,10 @@ def match_results(results, options: set[DialogueOption]):
 
 
 if __name__ == "__main__":
+    coqui_client = CoquiClient("Coqui/model.tflite", "Coqui/large_vocabulary.scorer")
+    whisper_client = WhisperClient("small.en") 
+    sb_client = SBClient("speechbrain/asr-transformer-transformerlm-librispeech")
+
     while True:
         input(
             "Press enter to proceed, then say one of the following to choose tree type or abort:\n"
@@ -97,29 +101,18 @@ if __name__ == "__main__":
 
         print("\nAnalysing via coqui...")
         start_time = time.time()
-        results["coqui"] = sampleClient.speech_to_text(
-            "recording.wav",
-            "Coqui/model.tflite",
-            "Coqui/large_vocabulary.scorer",
-        )
-        end_time = time.time()
-        coqui_time = end_time - start_time
+        results["coqui"] = coqui_client.speech_to_text("recording.wav")
+        coqui_time = time.time() - start_time
 
         print("\nAnalysing via whisper...")
         start_time = time.time()
-        results["whisper"] = client.speech_to_text("recording.wav", "small.en")
-        end_time = time.time()
-        whisper_time = end_time - start_time
+        results["whisper"] = whisper_client.speech_to_text("recording.wav")
+        whisper_time = time.time() - start_time
 
         print("\nAnalysing via SpeechBrain...")
         start_time = time.time()
-        sb_model = EncoderDecoderASR.from_hparams(
-            "speechbrain/asr-transformer-transformerlm-librispeech", 
-            run_opts={"device":"cuda"} 
-        )
-        results["speech_brain"] = sb_model.transcribe_file("recording.wav")
-        end_time = time.time()
-        sb_time = end_time - start_time
+        results["speech_brain"] = sb_client.speech_to_text("recording.wav")
+        sb_time = time.time() - start_time
 
         print(
             f"Coqui: '{results['coqui']}' in {coqui_time}\n"

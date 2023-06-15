@@ -1,6 +1,5 @@
 import sounddevice as sd
 import struct
-from Coqui import sampleClient
 
 MAX_SHORT_INT = 32767
 
@@ -35,5 +34,5 @@ def record_audio(length, fs):
 
 if __name__ == "__main__":
     record_audio(6, 16000)
-    sampleClient.speech_to_text("recording.wav", "model.tflite", "large_vocabulary.scorer")
+    print("I am recorder's main")
 
