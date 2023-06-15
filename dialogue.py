@@ -1,10 +1,10 @@
 import time
 
-from speechbrain.pretrained import EncoderDecoderASR
 
 import recorder
 from Coqui.CoquiClient import CoquiClient
 from Whisper.WhisperClient import WhisperClient
+from SpeechBrain.SBClient import SBClient
 from DialogueOption import DialogueOption
 
 
@@ -82,6 +82,7 @@ def match_results(results, options: set[DialogueOption]):
 if __name__ == "__main__":
     coqui_client = CoquiClient("Coqui/model.tflite", "Coqui/large_vocabulary.scorer")
     whisper_client = WhisperClient("small.en") 
+    sb_client = SBClient("speechbrain/asr-transformer-transformerlm-librispeech")
 
     while True:
         input(
@@ -110,11 +111,7 @@ if __name__ == "__main__":
 
         print("\nAnalysing via SpeechBrain...")
         start_time = time.time()
-        sb_model = EncoderDecoderASR.from_hparams(
-            "speechbrain/asr-transformer-transformerlm-librispeech", 
-            run_opts={"device":"cuda"} 
-        )
-        results["speech_brain"] = sb_model.transcribe_file("recording.wav")
+        results["speech_brain"] = sb_client.speech_to_text("recording.wav")
         sb_time = time.time() - start_time
 
         print(
