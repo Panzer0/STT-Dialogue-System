@@ -34,12 +34,10 @@ deciduous_def = {
     "emoji": "🌳"
 }
 
-stop_def = {
-    "name": "Stop"
-}
-
-palm_words = {"one", "on", "first", "palm"}
+# First option layer 
+palm_words = {"1", "one", "on", "first", "palm"}
 evergreen_words = {
+    "2"
     "two",
     "to",
     "too",
@@ -48,8 +46,8 @@ evergreen_words = {
     "pine",
     "pain"
 }
-
 deciduous_words = {
+    "3",
     "three",
     "tree",
     "he",
@@ -57,16 +55,44 @@ deciduous_words = {
     "third",
     "deciduous",
     "leaf",
-    "live"}
+    "live"
+}
 
-stop_words = {"four", "fourth", "stop", "abort"}
+# Second option layer
+name_words = {"1", "one", "on", "first", "name"}
+definition_words = {
+    "2"
+    "two",
+    "to",
+    "too",
+    "second",
+    "definition",
+    "define"
+}
+emoji_words = {
+    "3",
+    "three",
+    "tree",
+    "he",
+    "the",
+    "third",
+    "emoji"
+}
 
-palm_option = DialogueOption(palm_words, palm_def)
-evergreen_option = DialogueOption(evergreen_words, evergreen_def)
-deciduous_option = DialogueOption(deciduous_words, deciduous_def)
-stop_option = DialogueOption(stop_words, stop_def)
+stop_words = {"4", "four", "fourth", "stop", "abort"}
 
-OPTIONS = {palm_option, evergreen_option, deciduous_option, stop_option}
+palm_option = DialogueOption("palm", palm_words, palm_def)
+evergreen_option = DialogueOption("evergreen", evergreen_words, evergreen_def)
+deciduous_option = DialogueOption("deciduous", deciduous_words, deciduous_def)
+
+name_option = DialogueOption("name", name_words)
+definition_option = DialogueOption("definition", definition_words)
+emoji_option = DialogueOption("emoji", emoji_words) 
+
+stop_option = DialogueOption("stop", stop_words)
+
+OPTIONS_1 = {palm_option, evergreen_option, deciduous_option, stop_option}
+OPTIONS_2 = {name_option, definition_option, emoji_option, stop_option}
 
 
 
@@ -96,7 +122,6 @@ if __name__ == "__main__":
         # Record the user for 5 seconds with a sampling rate of 16 000 Hz
         recorder.record_audio(5, 16_000)
 
-        # Convert the recorded audio into text
         results = dict()
 
         print("\nAnalysing via coqui...")
@@ -121,11 +146,53 @@ if __name__ == "__main__":
         )
 
         # Try to match the recorded audio with one of the expected responses
-        selection = match_results(results['whisper'], OPTIONS)
+        selection = match_results(results['whisper'], OPTIONS_1)
         
         if selection is None:
             print("Unrecognised command. Please, try again.")
             continue
         elif selection.definition["name"] == "Stop":
             break
-        print(selection.definition["emoji"])
+
+        input(
+            "Press enter to proceed, then say one of the following to choose information to display or abort:\n"
+            "1 - Name\n"
+            "2 - Definition\n"
+            "3 - Emoji\n"
+            "4 - Stop\n"
+        )
+
+        # Record the user for 5 seconds with a sampling rate of 16 000 Hz
+        recorder.record_audio(5, 16_000)
+
+        print("\nAnalysing via coqui...")
+        start_time = time.time()
+        results["coqui"] = coqui_client.speech_to_text("recording.wav")
+        coqui_time = time.time() - start_time
+
+        print("\nAnalysing via whisper...")
+        start_time = time.time()
+        results["whisper"] = whisper_client.speech_to_text("recording.wav")
+        whisper_time = time.time() - start_time
+
+        print("\nAnalysing via SpeechBrain...")
+        start_time = time.time()
+        results["speech_brain"] = sb_client.speech_to_text("recording.wav")
+        sb_time = time.time() - start_time
+
+        print(
+            f"Coqui: '{results['coqui']}' in {coqui_time}\n"
+            f"Whisper: '{results['whisper']}' in {whisper_time}\n"
+            f"SpeechBrain: '{results['speech_brain']}' in {sb_time}"
+        )
+
+        # Try to match the recorded audio with one of the expected responses
+        selection_2 = match_results(results['whisper'], OPTIONS_2)
+        
+        if selection_2 is None:
+            print("Unrecognised command. Please, try again.")
+            continue
+        elif selection_2.name == "stop":
+            break
+
+        print(selection.definition[selection_2.name] + '\n')

@@ -14,9 +14,10 @@ def contains_word(text: str, word: str) -> None:
     """
     return re.search(r"\b" + word + r"\b", text)
 
-
+# todo: Decouple definition dicts from keywords. 
+# todo:     How to do this without making the class itself pointless? 
 class DialogueOption:
-    def __init__(self, keywords: set, definition: dict):
+    def __init__(self, name, keywords: set, definition: dict = None):
         """
         Initialize a new DialogueOption
 
@@ -24,6 +25,7 @@ class DialogueOption:
             keywords (set): A set of words that can result in the DialogueOption
             definition (dict): A dict that describes the given DialogueOption
         """
+        self.name = name
         self.keywords = keywords
         self.definition = definition
 
