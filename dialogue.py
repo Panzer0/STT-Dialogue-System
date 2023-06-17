@@ -51,7 +51,6 @@ deciduous_words = {
     "three",
     "tree",
     "he",
-    "the",
     "third",
     "deciduous",
     "leaf",
@@ -74,7 +73,6 @@ emoji_words = {
     "three",
     "tree",
     "he",
-    "the",
     "third",
     "emoji"
 }
@@ -106,7 +104,7 @@ def match_results(results, options: set[DialogueOption]):
 
 
 if __name__ == "__main__":
-    coqui_client = CoquiClient("Coqui/model.tflite", "Coqui/large_vocabulary.scorer")
+    coqui_client = CoquiClient("Coqui/model.tflite", "Coqui/huge-vocabulary.scorer")
     whisper_client = WhisperClient("small.en") 
     sb_client = SBClient("speechbrain/asr-transformer-transformerlm-librispeech")
 
