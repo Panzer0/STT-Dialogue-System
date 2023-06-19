@@ -37,7 +37,7 @@ deciduous_def = {
 # First option layer 
 palm_words = {"1", "one", "on", "first", "palm"}
 evergreen_words = {
-    "2"
+    "2",
     "two",
     "to",
     "too",
@@ -60,7 +60,7 @@ deciduous_words = {
 # Second option layer
 name_words = {"1", "one", "on", "first", "name"}
 definition_words = {
-    "2"
+    "2",
     "two",
     "to",
     "too",
