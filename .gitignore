@@ -1,5 +1,5 @@
-/Coqui/large_vocabulary.scorer
-/Coqui/model.tflite
+/core/tts_clients/Coqui/large_vocabulary.scorer
+/core/tts_clients/Coqui/model.tflite
 /venv/
 /py10-venv/
 /audio/misformatted/alright.m4a

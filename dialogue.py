@@ -1,10 +1,9 @@
 import time
 
-
-import recorder
-from Coqui.CoquiClient import CoquiClient
-from Whisper.WhisperClient import WhisperClient
-from SpeechBrain.SBClient import SBClient
+from core import recorder
+from core.tts_clients.Coqui import CoquiClient
+from core.tts_clients.Whisper import WhisperClient
+from core.tts_clients.SpeechBrain import SBClient
 from DialogueOption import DialogueOption
 
 
@@ -124,17 +123,17 @@ if __name__ == "__main__":
 
         print("\nAnalysing via coqui...")
         start_time = time.time()
-        results["coqui"] = coqui_client.speech_to_text("recording.wav")
+        results["coqui"] = coqui_client.transcribe("recording.wav")
         coqui_time = time.time() - start_time
 
         print("\nAnalysing via whisper...")
         start_time = time.time()
-        results["whisper"] = whisper_client.speech_to_text("recording.wav")
+        results["whisper"] = whisper_client.transcribe("recording.wav")
         whisper_time = time.time() - start_time
 
         print("\nAnalysing via SpeechBrain...")
         start_time = time.time()
-        results["speech_brain"] = sb_client.speech_to_text("recording.wav")
+        results["speech_brain"] = sb_client.transcribe("recording.wav")
         sb_time = time.time() - start_time
 
         print(
@@ -165,17 +164,17 @@ if __name__ == "__main__":
 
         print("\nAnalysing via coqui...")
         start_time = time.time()
-        results["coqui"] = coqui_client.speech_to_text("recording.wav")
+        results["coqui"] = coqui_client.transcribe("recording.wav")
         coqui_time = time.time() - start_time
 
         print("\nAnalysing via whisper...")
         start_time = time.time()
-        results["whisper"] = whisper_client.speech_to_text("recording.wav")
+        results["whisper"] = whisper_client.transcribe("recording.wav")
         whisper_time = time.time() - start_time
 
         print("\nAnalysing via SpeechBrain...")
         start_time = time.time()
-        results["speech_brain"] = sb_client.speech_to_text("recording.wav")
+        results["speech_brain"] = sb_client.transcribe("recording.wav")
         sb_time = time.time() - start_time
 
         print(
