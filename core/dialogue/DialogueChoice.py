@@ -25,7 +25,7 @@ class DialogueChoice:
         json_key: str = None,
         json_value: str = None,
         keywords: Set[str] = None,
-        successor: DialogueNode = None
+        successor: DialogueNode = None,
     ):
         self.json_path = json_path
         self.json_key = json_key
@@ -59,5 +59,5 @@ class DialogueChoice:
                 json.dump(data, json_file)
 
     def activate(self) -> None:
-        if self.json_path and self.json_key  and self.json_value:
+        if self.json_path and self.json_key and self.json_value:
             self.update_json()
