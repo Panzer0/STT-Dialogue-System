@@ -19,18 +19,22 @@ def save_audio(recording, fs, filename):
 def record_audio(length, fs, filename="recording.wav"):
     duration = int(length * fs)
     print("Recording...")
-    recording = sd.rec(duration, samplerate=fs, channels=1, blocking=False)
-
     try:
+        recording = sd.rec(duration, samplerate=fs, channels=1, blocking=False)
+
         while input("Type 'stop' to stop the recording: ").lower() != "stop":
             pass
-    except KeyboardInterrupt:
-        pass
 
-    sd.stop()
-    print("Recording stopped")
-    recording = recording / max(abs(recording)) * MAX_SHORT_INT
-    save_audio(recording, fs, filename)
+        sd.stop()
+        print("Recording stopped")
+        recording = recording / max(abs(recording)) * MAX_SHORT_INT
+        save_audio(recording, fs, filename)
+
+    except KeyboardInterrupt:
+        sd.stop()
+        print("Recording stopped due to keyboard interrupt.")
+    except Exception as e:
+        print("An error occurred during recording:", e)
 
 if __name__ == "__main__":
     record_audio(6, 16000)
