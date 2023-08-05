@@ -1,42 +1,48 @@
 import sounddevice as sd
-import struct
+import wave
+import numpy as np
+import threading
+import queue
 
 MAX_SHORT_INT = 32767
 
 def save_audio(recording, fs, filename):
-    with open(filename, "wb") as f:
-        f.write(b"RIFF")
-        f.write(struct.pack("<L", 36 + len(recording) * 2))
-        f.write(b"WAVE")
-        f.write(b"fmt ")
-        f.write(struct.pack("<LHHLLHH", 16, 1, 1, fs, fs * 2, 2, 16))
-        f.write(b"data")
-        f.write(struct.pack("<L", len(recording) * 2))
+    if recording is None:
+        raise ValueError("No recording data found.")
 
-        for sample in recording:
-            f.write(struct.pack("<h", int(sample)))
+    recording = recording / np.max(np.abs(recording)) * MAX_SHORT_INT
+    recording = recording.astype(np.int16)
+
+    with wave.open(filename, 'wb') as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(fs)
+        wf.writeframes(recording.tobytes())
+
+def record_audio_thread(q, duration, fs):
+    recording = sd.rec(duration, samplerate=fs, channels=1, dtype=np.int16)
+    sd.wait()
+    q.put(recording)
 
 def record_audio(length, fs, filename="recording.wav"):
     duration = int(length * fs)
-    print("Recording...")
+    print("Initialising recorder...")
     try:
-        recording = sd.rec(duration, samplerate=fs, channels=1, blocking=False)
+        q = queue.Queue()
+        recording_thread = threading.Thread(target=record_audio_thread, args=(q, duration, fs))
+        recording_thread.start()
+        print("Recording started. Type 'stop' to stop the recording.")
 
-        while input("Type 'stop' to stop the recording: ").lower() != "stop":
+        while input().lower() != "stop":
             pass
 
-        sd.stop()
+        recording_thread.join()
+        recording = q.get()
+
         print("Recording stopped")
-        recording = recording / max(abs(recording)) * MAX_SHORT_INT
         save_audio(recording, fs, filename)
 
     except KeyboardInterrupt:
-        sd.stop()
         print("Recording stopped due to keyboard interrupt.")
     except Exception as e:
         print("An error occurred during recording:", e)
-
-if __name__ == "__main__":
-    record_audio(6, 16000)
-    print("I am recorder's main")
-

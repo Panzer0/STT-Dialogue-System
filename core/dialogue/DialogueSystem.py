@@ -52,7 +52,7 @@ class DialogueSystem:
 
         result = ""
         for key in data.keys():
-            result += f"{key}: {data.keys}\n"
+            result += f"{key}: {data[key]}\n"
         return result
 
 
