@@ -23,6 +23,12 @@ def contains_word(text: str, word: str) -> None:
     return re.search(r"\b" + word + r"\b", text)
 
 
+def interpret_date(date_string: str):
+    now = datetime.now()
+    cal = pdt.Calendar()
+    return cal.parseDT(date_string, sourceTime=now)
+
+
 class DialogueDate:
     def __init__(
         self,
@@ -33,9 +39,11 @@ class DialogueDate:
     ):
         self.json_path = json_path
         self.json_key = json_key
-        self.keywords = keywords
+        self.json_key_verbal = json_key + '_verbal'
+        self.keywords = keywords if keywords is not None else set()
         self.successor = successor
 
+    # todo: is_mentioned is hardly a suitable name given the changes.
     def is_mentioned(self, text: str) -> bool:
         """
         Check if a string contains any keywords
@@ -46,29 +54,31 @@ class DialogueDate:
         Returns:
             bool: True if a keyword is contained in text, False otherwise
         """
-        return any(contains_word(text, word) for word in self.keywords)
+        keyword_used = any(contains_word(text, word) for word in self.keywords)
+        date, status = interpret_date(text)
+        is_valid_date = status == 1 and date > datetime.now()
+        return (keyword_used or not self.keywords) and is_valid_date
 
     def __update_json(self, date_string: str):
         try:
             with open(self.json_path, "r+") as json_file:
                 data = json.load(json_file)
-                data[self.json_key] = self.__interpret_date(date_string)
+                data[self.json_key] = interpret_date(date_string)[0]
+                data[self.json_key_verbal] = date_string
                 json_file.seek(0)
-                json.dump(data, json_file)
+                json.dump(data, json_file, default=str)
 
         except (FileNotFoundError, json.decoder.JSONDecodeError):
             with open(self.json_path, "w") as json_file:
-                data = {self.json_key: self.__interpret_date(date_string)}
+                data = {
+                    self.json_key: interpret_date(date_string)[0],
+                    self.json_key_verbal: date_string
+                }
                 json.dump(data, json_file, default=str)
 
-    def __interpret_date(self, date_string: str):
-        now = datetime.now()
-        cal = pdt.Calendar()
-        parsed_date, _ = cal.parseDT(date_string, sourceTime=now)
-        return parsed_date
-
-    # todo: DialogueChoice's activate takes no arguments. This might pose a
-    # todo: challenge if I decide to go for inheritance.
     def activate(self, date_string: str) -> None:
         if self.json_path and self.json_key:
             self.__update_json(date_string)
+
+if __name__ == '__main__':
+    print(interpret_date("tomorrow")[1])

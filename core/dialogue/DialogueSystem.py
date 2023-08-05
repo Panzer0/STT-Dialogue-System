@@ -66,9 +66,9 @@ if __name__ == "__main__":
         json_key="date",
     )
     date_prompt = "When would you like to schedule the appointment for?"
-    date_choices = set()
+    date_choices = {date_choice}
     date_node = DialogueNode(
-        date_choices, default_choice=date_choice, prompt=date_prompt
+        date_choices, prompt=date_prompt
     )
 
     ## Form choice declarations
@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
     # Dialogue system setup
     whisper_client = WhisperClient("small.en")
-    whisper_sys = DialogueSystem("results.json", date_node, whisper_client)
+    whisper_sys = DialogueSystem("results.json", clinic_node, whisper_client)
     whisper_sys.run_record("temp_audio.wav")
     print(whisper_sys.interpret())
     # whisper_sys.run_files(["temp_audio.wav"])

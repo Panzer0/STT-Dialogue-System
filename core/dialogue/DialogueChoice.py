@@ -30,7 +30,7 @@ class DialogueChoice:
         self.json_path = json_path
         self.json_key = json_key
         self.json_value = json_value
-        self.keywords = keywords
+        self.keywords = keywords if keywords is not None else set()
         self.successor = successor
 
     def is_mentioned(self, text: str) -> bool:
