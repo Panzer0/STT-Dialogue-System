@@ -188,7 +188,10 @@ if __name__ == "__main__":
         keywords={"secondary", "yellow"},
         successor=care_node,
     )
-    clinic_prompt = "Which clinic are you interested in?"
+    clinic_prompt = (
+        "Which clinic are you interested in?\n"
+        "(Primary at Park Street / Secondary at Yellow Street)"
+    )
     clinic_choices = {primary_clinic_choice, secondary_clinic_choice}
     clinic_node = DialogueNode(clinic_choices, prompt=clinic_prompt)
 
