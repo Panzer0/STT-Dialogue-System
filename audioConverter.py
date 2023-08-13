@@ -1,34 +1,43 @@
 from pydub import AudioSegment
 import sys
 import os
-import scipy.io.wavefile
+import glob
+
+SUPPORTED_FORMATS = ["mp3", "ogg", "wav", "flac", "m4a", "aac"]
+
+
+def convert_audio(input_path, output_path):
+    sound = AudioSegment.from_file(input_path)
+    sound.export(output_path, format="wav")
+
+
+def convert_folder(input_folder, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+
+    audio_files = [
+        file
+        for ext in SUPPORTED_FORMATS
+        for file in glob.glob(os.path.join(input_folder, f"*.{ext}"))
+    ]
+
+    for audio_file in audio_files:
+        base_name = os.path.basename(audio_file)
+        new_name = os.path.splitext(base_name)[0] + ".wav"
+        output_path = os.path.join(output_folder, new_name)
+
+        convert_audio(audio_file, output_path)
+
 
 if __name__ == "__main__":
-    # Set the filename variable to the value given as an argument
-    file_name = sys.argv[1]
+    if len(sys.argv) != 3:
+        print("Usage: python script_name.py input_folder output_folder")
+        sys.exit(1)
 
-    # Split the file name into base name and extension
-    base, ext = os.path.splitext(file_name)
+    input_folder = sys.argv[1]
+    output_folder = sys.argv[2]
 
-    # Join the base name and the new extension
-    new_name = base + ".wav"
+    if not os.path.exists(input_folder):
+        print("Input folder does not exist.")
+        sys.exit(1)
 
-    # Open the source file
-    sound = AudioSegment.from_file(
-        f"audio/misformatted/{file_name}", format=ext[1:]
-    )
-
-    # Save the .wav file
-    sound.export(f"audio/wav/{new_name}", format="wav")
-
-    # ## Doesn't work. Something seems to be wrong with my scipy installation
-    # ## For the time being replace it with
-    # ## `sox .\audio\wav\alright.wav -r 16000 .\audio\wav\alright2.wav`
-    # # Load the .wav file
-    # sample_rate, data = scipy.io.wavefile.read(f"audio/wav/{new_name}")
-    #
-    # # Change the sample rate
-    # new_sample_rate = 16000
-    #
-    # # Save the .wav file with the new sample rate
-    # scipy.io.wavefile.write(f"audio/wav/altered_{new_name}", new_sample_rate, data)
+    convert_folder(input_folder, output_folder)

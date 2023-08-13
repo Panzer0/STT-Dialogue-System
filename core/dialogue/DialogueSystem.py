@@ -88,6 +88,7 @@ if __name__ == "__main__":
         keywords={"person", "personal"},
         successor=date_node,
     )
+
     form_prompt = (
         "What form of appointment would you like to make?\n"
         "(Remote/in-person)"
@@ -194,6 +195,30 @@ if __name__ == "__main__":
     )
     clinic_choices = {primary_clinic_choice, secondary_clinic_choice}
     clinic_node = DialogueNode(clinic_choices, prompt=clinic_prompt)
+
+    ## Return choice declarations
+    clinic_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=clinic_node,
+    )
+    care_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=care_node,
+    )
+    specialist_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=specialist_node,
+    )
+    form_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=form_node,
+    )
+    date_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=date_node,
+    )
+
+
 
     # Dialogue system setup
     whisper_client = WhisperClient("small.en")
