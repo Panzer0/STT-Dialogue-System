@@ -67,9 +67,7 @@ if __name__ == "__main__":
     )
     date_prompt = "When would you like to schedule the appointment for?"
     date_choices = {date_choice}
-    date_node = DialogueNode(
-        date_choices, prompt=date_prompt
-    )
+    date_node = DialogueNode(date_choices, prompt=date_prompt)
 
     ## Form choice declarations
     remote_choice = DialogueChoice(
@@ -218,11 +216,21 @@ if __name__ == "__main__":
         successor=date_node,
     )
 
-
-
     # Dialogue system setup
     whisper_client = WhisperClient("small.en")
     whisper_sys = DialogueSystem("results.json", clinic_node, whisper_client)
-    whisper_sys.run_record("temp_audio.wav")
+
+    # whisper_sys.run_record("temp_audio.wav")
+
+    path = "audio/subjects/marcin"
+    whisper_sys.run_files(
+        [
+            f"{path}/appointment_primary_marcin.wav",
+            f"{path}/specialist_marcin.wav",
+            f"{path}/orthodontist_marcin.wav",
+            f"{path}/remote_marcin.wav",
+            f"{path}/tomorrow_marcin.wav",
+        ],
+    )
+
     print(whisper_sys.interpret())
-    # whisper_sys.run_files(["temp_audio.wav"])

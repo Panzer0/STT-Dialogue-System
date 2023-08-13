@@ -2,7 +2,7 @@ from typing import Set
 
 
 class DialogueNode:
-    def __init__(self, choices: Set, default_choice=None, prompt: str = "", predecessor = ):
+    def __init__(self, choices: Set, default_choice=None, prompt: str = ""):
         self.choices = choices
         self.default_choice = default_choice
         self.prompt = prompt

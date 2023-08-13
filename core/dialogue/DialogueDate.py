@@ -39,7 +39,7 @@ class DialogueDate:
     ):
         self.json_path = json_path
         self.json_key = json_key
-        self.json_key_verbal = json_key + '_verbal'
+        self.json_key_verbal = json_key + "_verbal"
         self.keywords = keywords if keywords is not None else set()
         self.successor = successor
 
@@ -72,7 +72,7 @@ class DialogueDate:
             with open(self.json_path, "w") as json_file:
                 data = {
                     self.json_key: interpret_date(date_string)[0],
-                    self.json_key_verbal: date_string
+                    self.json_key_verbal: date_string,
                 }
                 json.dump(data, json_file, default=str)
 
@@ -80,5 +80,6 @@ class DialogueDate:
         if self.json_path and self.json_key:
             self.__update_json(date_string)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print(interpret_date("tomorrow")[1])
