@@ -48,12 +48,16 @@ class DialogueChoice:
     def __update_json(self):
         try:
             with open(self.json_path, "r+") as json_file:
+                print(f"UPDATING FILE WITH KEY {self.json_key} AND VALUE {self.json_value}")
                 data = json.load(json_file)
                 data[self.json_key] = self.json_value
                 json_file.seek(0)
+                json_file.truncate()
+                print(f"Dumping {data}")
                 json.dump(data, json_file)
 
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
+        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+            print(f"An error occurred: {e}")
             with open(self.json_path, "w") as json_file:
                 data = {self.json_key: self.json_value}
                 json.dump(data, json_file)
