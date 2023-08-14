@@ -6,6 +6,7 @@ from core.dialogue.DialogueDate import DialogueDate
 from core.recorder import record_audio
 from core.tts_clients.Whisper.WhisperClient import WhisperClient
 
+RETURN_KEYWORDS = {"return", "cancel", "back"}
 
 class DialogueSystem:
     def __init__(self, json_path: str, start_point: DialogueNode, stt_client):
@@ -13,6 +14,19 @@ class DialogueSystem:
         self.start_point = start_point
         self.stt_client = stt_client
         open(json_path, "w").close()
+
+    def __adjust_predecessors(self, current_node: DialogueNode, next_node: DialogueNode):
+        if next_node.back_choice:
+            if next_node.back_choice.successor is None:
+                # This means we're threading forward
+                next_node.back_choice.successor = current_node
+            else:
+                # This means we're threading backwards
+                current_node.back_choice.successor = None
+                # todo: This assumes that the choices all have the same json_keys.
+                # todo: Safe for the purpose of this project, but very bad practice.
+                # todo: Perhaps come up with a better solution.
+                list(next_node.choices)[0].erase_json()
 
     def step(self, record: bool, path: str, node: DialogueNode) -> DialogueNode:
         print(node)
@@ -22,17 +36,41 @@ class DialogueSystem:
         print(f"Answer is {answer}")
         return node.advance(answer)
 
+    # todo: Does this really belong at this abstraction level?
+    def __purge_latest_json(self):
+        try:
+            with open(self.json_path, "r") as json_file:
+                data = json.load(json_file)
+
+            if data:
+                last_key = list(data.keys())[-1]
+                del data[last_key]
+
+                with open(self.json_path, "w") as json_file:
+                    json.dump(data, json_file)
+
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            #todo Maybe let's not just pass
+            pass
+
+
     def run_files(self, paths: list[str]) -> None:
-        node = self.start_point
+        curr_node = self.start_point
         for path in paths:
-            node = self.step(False, path, node)
-            if not node:
+            new_node = self.step(False, path, curr_node)
+            if not new_node:
                 return
+            else:
+                self.__adjust_predecessors(curr_node, new_node)
+            curr_node = new_node
 
     def run_record(self, path: str) -> None:
-        node = self.start_point
-        while node:
-            node = self.step(True, path, node)
+        curr_node = self.start_point
+        while curr_node:
+            new_node = self.step(True, path, curr_node)
+            if new_node:
+                self.__adjust_predecessors(curr_node, new_node)
+            curr_node = new_node
 
     # todo: For now it's hard-coded for this particular scenario. Change this.
     def interpret(self):
@@ -67,9 +105,7 @@ if __name__ == "__main__":
     )
     date_prompt = "When would you like to schedule the appointment for?"
     date_choices = {date_choice}
-    date_node = DialogueNode(
-        date_choices, prompt=date_prompt
-    )
+    date_node = DialogueNode(date_choices, back_keywords=RETURN_KEYWORDS, prompt=date_prompt)
 
     ## Form choice declarations
     remote_choice = DialogueChoice(
@@ -88,12 +124,13 @@ if __name__ == "__main__":
         keywords={"person", "personal"},
         successor=date_node,
     )
+
     form_prompt = (
         "What form of appointment would you like to make?\n"
         "(Remote/in-person)"
     )
     form_choices = {remote_choice, personal_choice}
-    form_node = DialogueNode(form_choices, prompt=form_prompt)
+    form_node = DialogueNode(form_choices, back_keywords=RETURN_KEYWORDS, prompt=form_prompt)
 
     ## Specialist choice declarations
     orthodontist_choice = DialogueChoice(
@@ -142,7 +179,7 @@ if __name__ == "__main__":
         cardiologist_choice,
         laryngologist_choice,
     }
-    specialist_node = DialogueNode(specialist_choices, prompt=specialist_prompt)
+    specialist_node = DialogueNode(specialist_choices, back_keywords=RETURN_KEYWORDS, prompt=specialist_prompt)
 
     ## Care choice declarations
     specialist_choice = DialogueChoice(
@@ -171,7 +208,7 @@ if __name__ == "__main__":
         "(Primary/special/occupational care)"
     )
     care_choices = {specialist_choice, occupational_choice, primary_choice}
-    care_node = DialogueNode(care_choices, prompt=care_prompt)
+    care_node = DialogueNode(care_choices, back_keywords=RETURN_KEYWORDS, prompt=care_prompt)
 
     ## Clinic choice declarations
     primary_clinic_choice = DialogueChoice(
@@ -193,11 +230,48 @@ if __name__ == "__main__":
         "(Primary at Park Street / Secondary at Yellow Street)"
     )
     clinic_choices = {primary_clinic_choice, secondary_clinic_choice}
-    clinic_node = DialogueNode(clinic_choices, prompt=clinic_prompt)
+    clinic_node = DialogueNode(clinic_choices, back_keywords=RETURN_KEYWORDS, prompt=clinic_prompt)
+
+    ## Return choice declarations
+    clinic_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=clinic_node,
+    )
+    care_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=care_node,
+    )
+    specialist_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=specialist_node,
+    )
+    form_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=form_node,
+    )
+    date_ret_choice = DialogueChoice(
+        keywords={"return", "back", "cancel"},
+        successor=date_node,
+    )
 
     # Dialogue system setup
     whisper_client = WhisperClient("small.en")
     whisper_sys = DialogueSystem("results.json", clinic_node, whisper_client)
-    whisper_sys.run_record("temp_audio.wav")
+
+    # whisper_sys.run_record("temp_audio.wav")
+
+    path = "audio/subjects/marcin"
+    whisper_sys.run_files(
+        [
+            f"{path}/appointment_primary_marcin.wav",
+            f"{path}/specialist_marcin.wav",
+            f"{path}/orthodontist_marcin.wav",
+            f"{path}/return_marcin.wav",
+            f"{path}/return_marcin.wav",
+            f"{path}/primary_care_marcin.wav",
+            f"{path}/remote_marcin.wav",
+            f"{path}/tomorrow_marcin.wav",
+        ],
+    )
+
     print(whisper_sys.interpret())
-    # whisper_sys.run_files(["temp_audio.wav"])

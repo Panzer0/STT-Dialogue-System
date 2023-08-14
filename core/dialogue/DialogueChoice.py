@@ -45,15 +45,34 @@ class DialogueChoice:
         """
         return any(contains_word(text, word) for word in self.keywords)
 
+    def erase_json(self):
+        if self.json_path and self.json_key and self.json_value:
+            try:
+                with open(self.json_path, "r+") as json_file:
+                    data = json.load(json_file)
+                    if self.json_key in data:
+                        del data[self.json_key]
+                        json_file.seek(0)
+                        json_file.truncate()
+                        json.dump(data, json_file)
+
+            except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+                print(f"An error occurred: {e}")
+
+
     def __update_json(self):
         try:
             with open(self.json_path, "r+") as json_file:
+                print(f"UPDATING FILE WITH KEY {self.json_key} AND VALUE {self.json_value}")
                 data = json.load(json_file)
                 data[self.json_key] = self.json_value
                 json_file.seek(0)
+                json_file.truncate()
+                print(f"Dumping {data}")
                 json.dump(data, json_file)
 
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
+        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+            print(f"An error occurred: {e}")
             with open(self.json_path, "w") as json_file:
                 data = {self.json_key: self.json_value}
                 json.dump(data, json_file)
