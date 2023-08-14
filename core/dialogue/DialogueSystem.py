@@ -22,8 +22,11 @@ class DialogueSystem:
                 next_node.back_choice.successor = current_node
             else:
                 # This means we're threading backwards
-                self.__purge_latest_json()
                 current_node.back_choice.successor = None
+                # todo: This assumes that the choices all have the same json_keys.
+                # todo: Safe for the purpose of this project, but very bad practice.
+                # todo: Perhaps come up with a better solution.
+                list(next_node.choices)[0].erase_json()
 
     def step(self, record: bool, path: str, node: DialogueNode) -> DialogueNode:
         print(node)

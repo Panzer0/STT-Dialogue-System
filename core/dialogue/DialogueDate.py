@@ -59,6 +59,21 @@ class DialogueDate:
         is_valid_date = status == 1 and date > datetime.now()
         return (keyword_used or not self.keywords) and is_valid_date
 
+    def erase_json(self):
+        if self.json_path and self.json_key:
+            try:
+                with open(self.json_path, "r+") as json_file:
+                    data = json.load(json_file)
+                    if self.json_key in data:
+                        del data[self.json_key]
+                        del data[self.json_key_verbal]
+                        json_file.seek(0)
+                        json_file.truncate()
+                        json.dump(data, json_file)
+
+            except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+                print(f"An error occurred: {e}")
+
     def __update_json(self, date_string: str):
         try:
             with open(self.json_path, "r+") as json_file:
