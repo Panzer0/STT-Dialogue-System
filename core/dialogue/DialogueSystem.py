@@ -36,24 +36,6 @@ class DialogueSystem:
         print(f"Answer is {answer}")
         return node.advance(answer)
 
-    # todo: Does this really belong at this abstraction level?
-    def __purge_latest_json(self):
-        try:
-            with open(self.json_path, "r") as json_file:
-                data = json.load(json_file)
-
-            if data:
-                last_key = list(data.keys())[-1]
-                del data[last_key]
-
-                with open(self.json_path, "w") as json_file:
-                    json.dump(data, json_file)
-
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-            #todo Maybe let's not just pass
-            pass
-
-
     def run_files(self, paths: list[str]) -> None:
         curr_node = self.start_point
         for path in paths:
@@ -266,9 +248,6 @@ if __name__ == "__main__":
             f"{path}/appointment_primary_marcin.wav",
             f"{path}/specialist_marcin.wav",
             f"{path}/orthodontist_marcin.wav",
-            f"{path}/return_marcin.wav",
-            f"{path}/return_marcin.wav",
-            f"{path}/primary_care_marcin.wav",
             f"{path}/remote_marcin.wav",
             f"{path}/tomorrow_marcin.wav",
         ],
