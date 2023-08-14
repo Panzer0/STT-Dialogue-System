@@ -97,4 +97,4 @@ class DialogueDate:
 
 
 if __name__ == "__main__":
-    print(interpret_date("tomorrow")[1])
+    print(interpret_date("How about in a week?")[0])
