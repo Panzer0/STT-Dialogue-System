@@ -1,8 +1,7 @@
+import os
 import re
-import DialogueNode
 import json
 from typing import Set
-
 
 def contains_word(text: str, word: str) -> None:
     """
@@ -18,6 +17,14 @@ def contains_word(text: str, word: str) -> None:
     return re.search(r"\b" + word + r"\b", text)
 
 
+def generate_verbal_path(path):
+    directory, filename = os.path.split(path)
+    name, extension = os.path.splitext(filename)
+    new_filename = f"{name}_verbal{extension}"
+    new_path = os.path.join(directory, new_filename)
+    return new_path
+
+
 class DialogueChoice:
     def __init__(
         self,
@@ -25,9 +32,10 @@ class DialogueChoice:
         json_key: str = None,
         json_value: str = None,
         keywords: Set[str] = None,
-        successor: DialogueNode = None,
+        successor: "DialogueNode" = None,
     ):
         self.json_path = json_path
+        self.json_path_verbal = generate_verbal_path(json_path) if json_path else None
         self.json_key = json_key
         self.json_value = json_value
         self.keywords = keywords if keywords is not None else set()
@@ -45,38 +53,43 @@ class DialogueChoice:
         """
         return any(contains_word(text, word) for word in self.keywords)
 
-    def erase_json(self):
-        if self.json_path and self.json_key and self.json_value:
-            try:
-                with open(self.json_path, "r+") as json_file:
-                    data = json.load(json_file)
-                    if self.json_key in data:
-                        del data[self.json_key]
-                        json_file.seek(0)
-                        json_file.truncate()
-                        json.dump(data, json_file)
-
-            except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
-                print(f"An error occurred: {e}")
-
-
-    def __update_json(self):
-        try:
-            with open(self.json_path, "r+") as json_file:
-                print(f"UPDATING FILE WITH KEY {self.json_key} AND VALUE {self.json_value}")
-                data = json.load(json_file)
-                data[self.json_key] = self.json_value
+    def erase_json(self, json_path, json_key):
+        with open(json_path, "r+") as json_file:
+            data = json.load(json_file)
+            if json_key in data:
+                del data[json_key]
                 json_file.seek(0)
                 json_file.truncate()
-                print(f"Dumping {data}")
-                json.dump(data, json_file)
+                json.dump(data, json_file, indent=4)
+
+    def erase_all_json(self):
+        if not (self.json_path and self.json_key and self.json_value):
+            return
+        try:
+            self.erase_json(self.json_path, self.json_key)
+            self.erase_json(self.json_path_verbal, self.json_key)
+        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+            print(f"An error occurred: {e}")
+
+    def __update_json(self, path, key, value):
+        try:
+            with open(path, "r+") as json_file:
+                data = json.load(json_file)
+                data[key] = value
+                json_file.seek(0)
+                json_file.truncate()
+                json.dump(data, json_file, indent=4)
 
         except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
             print(f"An error occurred: {e}")
-            with open(self.json_path, "w") as json_file:
-                data = {self.json_key: self.json_value}
-                json.dump(data, json_file)
+            with open(path, "w") as json_file:
+                data = {key: value}
+                json.dump(data, json_file, indent=4)
 
     def activate(self, answer: str = None) -> None:
         if self.json_path and self.json_key and self.json_value:
-            self.__update_json()
+            self.__update_json(self.json_path, self.json_key, self.json_value)
+            self.__update_json(self.json_path_verbal, self.json_key, answer)
+
+if __name__ == '__main__':
+    print(generate_verbal_path("path/to/file.json"))

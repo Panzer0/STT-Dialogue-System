@@ -1,12 +1,11 @@
 # todo: This mirrors much of DialogueChoice. Rework with inheritance at mind?
 import json
+import os
 import re
 from typing import Set
 
 import parsedatetime as pdt
 from datetime import datetime
-
-import DialogueNode
 
 
 def contains_word(text: str, word: str) -> None:
@@ -28,6 +27,13 @@ def interpret_date(date_string: str):
     cal = pdt.Calendar()
     return cal.parseDT(date_string, sourceTime=now)
 
+def generate_verbal_path(path):
+    directory, filename = os.path.split(path)
+    name, extension = os.path.splitext(filename)
+    new_filename = f"{name}_verbal{extension}"
+    new_path = os.path.join(directory, new_filename)
+    return new_path
+
 
 class DialogueDate:
     def __init__(
@@ -35,9 +41,10 @@ class DialogueDate:
         json_path: str = None,
         json_key: str = None,
         keywords: Set[str] = None,
-        successor: DialogueNode = None,
+        successor: "DialogueNode" = None,
     ):
         self.json_path = json_path
+        self.json_path_verbal = generate_verbal_path(json_path) if json_path else None
         self.json_key = json_key
         self.json_key_verbal = json_key + "_verbal"
         self.keywords = keywords if keywords is not None else set()
@@ -59,41 +66,43 @@ class DialogueDate:
         is_valid_date = status == 1 and date > datetime.now()
         return (keyword_used or not self.keywords) and is_valid_date
 
-    def erase_json(self):
-        if self.json_path and self.json_key:
-            try:
-                with open(self.json_path, "r+") as json_file:
-                    data = json.load(json_file)
-                    if self.json_key in data:
-                        del data[self.json_key]
-                        del data[self.json_key_verbal]
-                        json_file.seek(0)
-                        json_file.truncate()
-                        json.dump(data, json_file)
-
-            except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
-                print(f"An error occurred: {e}")
-
-    def __update_json(self, date_string: str):
-        try:
-            with open(self.json_path, "r+") as json_file:
-                data = json.load(json_file)
-                data[self.json_key] = interpret_date(date_string)[0]
-                data[self.json_key_verbal] = date_string
+    def erase_json(self, json_path, json_key):
+        with open(json_path, "r+") as json_file:
+            data = json.load(json_file)
+            if json_key in data:
+                del data[json_key]
                 json_file.seek(0)
-                json.dump(data, json_file, default=str)
+                json_file.truncate()
+                json.dump(data, json_file, indent=4)
 
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-            with open(self.json_path, "w") as json_file:
-                data = {
-                    self.json_key: interpret_date(date_string)[0],
-                    self.json_key_verbal: date_string,
-                }
-                json.dump(data, json_file, default=str)
+    def erase_all_json(self):
+        if not (self.json_path and self.json_key):
+            return
+        try:
+            self.erase_json(self.json_path, self.json_key)
+            self.erase_json(self.json_path_verbal, self.json_key)
+        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+            print(f"An error occurred: {e}")
+
+    def __update_json(self, path, key, value):
+        try:
+            with open(path, "r+") as json_file:
+                data = json.load(json_file)
+                data[key] = value
+                json_file.seek(0)
+                json_file.truncate()
+                json.dump(data, json_file, default=str, indent=4)
+
+        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+            print(f"An error occurred: {e}")
+            with open(path, "w") as json_file:
+                data = {key: value}
+                json.dump(data, json_file, default=str, indent=4)
 
     def activate(self, date_string: str) -> None:
         if self.json_path and self.json_key:
-            self.__update_json(date_string)
+            self.__update_json(self.json_path, self.json_key, interpret_date(date_string)[0])
+            self.__update_json(self.json_path_verbal, self.json_key, date_string)
 
 
 if __name__ == "__main__":
