@@ -27,6 +27,7 @@ def interpret_date(date_string: str):
     cal = pdt.Calendar()
     return cal.parseDT(date_string, sourceTime=now)
 
+
 def generate_verbal_path(path):
     directory, filename = os.path.split(path)
     name, extension = os.path.splitext(filename)
@@ -44,7 +45,9 @@ class DialogueDate:
         successor: "DialogueNode" = None,
     ):
         self.json_path = json_path
-        self.json_path_verbal = generate_verbal_path(json_path) if json_path else None
+        self.json_path_verbal = (
+            generate_verbal_path(json_path) if json_path else None
+        )
         self.json_key = json_key
         self.json_key_verbal = json_key + "_verbal"
         self.keywords = keywords if keywords is not None else set()
@@ -101,8 +104,12 @@ class DialogueDate:
 
     def activate(self, date_string: str) -> None:
         if self.json_path and self.json_key:
-            self.__update_json(self.json_path, self.json_key, interpret_date(date_string)[0])
-            self.__update_json(self.json_path_verbal, self.json_key, date_string)
+            self.__update_json(
+                self.json_path, self.json_key, interpret_date(date_string)[0]
+            )
+            self.__update_json(
+                self.json_path_verbal, self.json_key, date_string
+            )
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ from core.tts_clients.Whisper.WhisperClient import WhisperClient
 
 RETURN_KEYWORDS = {"return", "cancel", "back"}
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Dialogue system structure setup
     ## Date choice declarations
@@ -21,7 +21,9 @@ if __name__ == '__main__':
     )
     date_prompt = "When would you like to schedule the appointment for?"
     date_choices = {date_choice}
-    date_node = DialogueNode(date_choices, back_keywords=RETURN_KEYWORDS, prompt=date_prompt)
+    date_node = DialogueNode(
+        date_choices, back_keywords=RETURN_KEYWORDS, prompt=date_prompt
+    )
 
     ## Form choice declarations
     remote_choice = DialogueChoice(
@@ -46,7 +48,9 @@ if __name__ == '__main__':
         "(Remote/in-person)"
     )
     form_choices = {remote_choice, personal_choice}
-    form_node = DialogueNode(form_choices, back_keywords=RETURN_KEYWORDS, prompt=form_prompt)
+    form_node = DialogueNode(
+        form_choices, back_keywords=RETURN_KEYWORDS, prompt=form_prompt
+    )
 
     ## Specialist choice declarations
     orthodontist_choice = DialogueChoice(
@@ -95,14 +99,24 @@ if __name__ == '__main__':
         cardiologist_choice,
         laryngologist_choice,
     }
-    specialist_node = DialogueNode(specialist_choices, back_keywords=RETURN_KEYWORDS, prompt=specialist_prompt)
+    specialist_node = DialogueNode(
+        specialist_choices,
+        back_keywords=RETURN_KEYWORDS,
+        prompt=specialist_prompt,
+    )
 
     ## Care choice declarations
     specialist_choice = DialogueChoice(
         json_path="results.json",
         json_key="care",
         json_value="specialist",
-        keywords={"specialist", "specialists", "special", "specialized", "specialised"},
+        keywords={
+            "specialist",
+            "specialists",
+            "special",
+            "specialized",
+            "specialised",
+        },
         successor=specialist_node,
     )
     occupational_choice = DialogueChoice(
@@ -124,7 +138,9 @@ if __name__ == '__main__':
         "(Primary/special/occupational care)"
     )
     care_choices = {specialist_choice, occupational_choice, primary_choice}
-    care_node = DialogueNode(care_choices, back_keywords=RETURN_KEYWORDS, prompt=care_prompt)
+    care_node = DialogueNode(
+        care_choices, back_keywords=RETURN_KEYWORDS, prompt=care_prompt
+    )
 
     ## Clinic choice declarations
     primary_clinic_choice = DialogueChoice(
@@ -146,7 +162,9 @@ if __name__ == '__main__':
         "(Primary at Park Street / Secondary at Yellow Street)"
     )
     clinic_choices = {primary_clinic_choice, secondary_clinic_choice}
-    clinic_node = DialogueNode(clinic_choices, back_keywords=RETURN_KEYWORDS, prompt=clinic_prompt)
+    clinic_node = DialogueNode(
+        clinic_choices, back_keywords=RETURN_KEYWORDS, prompt=clinic_prompt
+    )
 
     ## Return choice declarations
     clinic_ret_choice = DialogueChoice(
@@ -189,14 +207,10 @@ if __name__ == '__main__':
 
     print(whisper_sys.interpret())
 
-
-
     reference = "give me a specialist"
     hypothesis = "give me a special list"
 
     cer_val = cer(reference, hypothesis)
     wer_val = wer(reference, hypothesis)
 
-    print(f"cer: {cer_val}\n"
-          f"wer: {wer_val}")
-
+    print(f"cer: {cer_val}\n" f"wer: {wer_val}")

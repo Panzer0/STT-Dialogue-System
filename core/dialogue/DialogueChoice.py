@@ -3,6 +3,7 @@ import re
 import json
 from typing import Set
 
+
 def contains_word(text: str, word: str) -> None:
     """
     Check if a string contains a given word
@@ -35,7 +36,9 @@ class DialogueChoice:
         successor: "DialogueNode" = None,
     ):
         self.json_path = json_path
-        self.json_path_verbal = generate_verbal_path(json_path) if json_path else None
+        self.json_path_verbal = (
+            generate_verbal_path(json_path) if json_path else None
+        )
         self.json_key = json_key
         self.json_value = json_value
         self.keywords = keywords if keywords is not None else set()
@@ -91,5 +94,6 @@ class DialogueChoice:
             self.__update_json(self.json_path, self.json_key, self.json_value)
             self.__update_json(self.json_path_verbal, self.json_key, answer)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print(generate_verbal_path("path/to/file.json"))

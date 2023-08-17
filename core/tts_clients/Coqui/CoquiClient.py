@@ -14,13 +14,12 @@ except ImportError:
     from pipes import quote
 
 
-class CoquiClient():
+class CoquiClient:
     def __init__(self, model, scorer="None"):
         self.model = Model(model)
 
         if scorer:
             self.model.enableExternalScorer(scorer)
-
 
     def convert_samplerate(audio_path, desired_sample_rate):
         sox_cmd = "sox {} --type raw --bits 16 --channels 1 --rate {} --encoding signed-integer --endian little --compression 0.0 --no-dither - ".format(
@@ -31,7 +30,9 @@ class CoquiClient():
                 shlex.split(sox_cmd), stderr=subprocess.PIPE
             )
         except subprocess.CalledProcessError as e:
-            raise RuntimeError("SoX returned non-zero status: {}".format(e.stderr))
+            raise RuntimeError(
+                "SoX returned non-zero status: {}".format(e.stderr)
+            )
         except OSError as e:
             raise OSError(
                 e.errno,
@@ -42,8 +43,7 @@ class CoquiClient():
 
         return desired_sample_rate, np.frombuffer(output, np.int16)
 
-
-    def transcribe(self, audio:str)->str:
+    def transcribe(self, audio: str) -> str:
         desired_sample_rate = self.model.sampleRate()
 
         fin = wave.open(audio, "rb")

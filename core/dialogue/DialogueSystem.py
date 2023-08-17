@@ -10,7 +10,9 @@ class DialogueSystem:
         self.stt_client = stt_client
         open(json_path, "w").close()
 
-    def __adjust_predecessors(self, current_node: "DialogueNode", next_node: "DialogueNode"):
+    def __adjust_predecessors(
+        self, current_node: "DialogueNode", next_node: "DialogueNode"
+    ):
         if next_node.back_choice:
             if next_node.back_choice.successor is None:
                 # This means we're threading forward
@@ -23,7 +25,9 @@ class DialogueSystem:
                 # todo: Perhaps come up with a better solution.
                 list(next_node.choices)[0].erase_all_json()
 
-    def step(self, record: bool, path: str, node: "DialogueNode") -> "DialogueNode":
+    def step(
+        self, record: bool, path: str, node: "DialogueNode"
+    ) -> "DialogueNode":
         print(node)
         if record:
             record_audio(5, 16_000, path)

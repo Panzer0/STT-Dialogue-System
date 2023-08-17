@@ -4,10 +4,18 @@ from core.dialogue.DialogueChoice import DialogueChoice
 
 
 class DialogueNode:
-    def __init__(self, choices: Set, default_choice=None, back_keywords: Set[str] = None, prompt: str = ""):
+    def __init__(
+        self,
+        choices: Set,
+        default_choice=None,
+        back_keywords: Set[str] = None,
+        prompt: str = "",
+    ):
         self.choices = choices
         self.default_choice = default_choice
-        self.back_choice = DialogueChoice(keywords=back_keywords) if back_keywords else None
+        self.back_choice = (
+            DialogueChoice(keywords=back_keywords) if back_keywords else None
+        )
         self.prompt = prompt
 
     def advance(self, answer: str) -> "DialogueNode":
