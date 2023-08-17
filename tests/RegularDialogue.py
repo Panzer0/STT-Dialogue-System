@@ -1,5 +1,3 @@
-# todo: Implement a better way to run tests
-# todo: Implement WER, CER and path validity tests
 from jiwer import wer, cer
 
 from core.dialogue.DialogueChoice import DialogueChoice
@@ -12,7 +10,6 @@ from core.tts_clients.Whisper.WhisperClient import WhisperClient
 RETURN_KEYWORDS = {"return", "cancel", "back"}
 
 if __name__ == "__main__":
-
     # Dialogue system structure setup
     ## Date choice declarations
     date_choice = DialogueDate(
@@ -166,28 +163,6 @@ if __name__ == "__main__":
         clinic_choices, back_keywords=RETURN_KEYWORDS, prompt=clinic_prompt
     )
 
-    ## Return choice declarations
-    clinic_ret_choice = DialogueChoice(
-        keywords={"return", "back", "cancel"},
-        successor=clinic_node,
-    )
-    care_ret_choice = DialogueChoice(
-        keywords={"return", "back", "cancel"},
-        successor=care_node,
-    )
-    specialist_ret_choice = DialogueChoice(
-        keywords={"return", "back", "cancel"},
-        successor=specialist_node,
-    )
-    form_ret_choice = DialogueChoice(
-        keywords={"return", "back", "cancel"},
-        successor=form_node,
-    )
-    date_ret_choice = DialogueChoice(
-        keywords={"return", "back", "cancel"},
-        successor=date_node,
-    )
-
     # Dialogue system setup
     whisper_client = WhisperClient("small.en")
     whisper_sys = DialogueSystem("results.json", clinic_node, whisper_client)
@@ -198,6 +173,8 @@ if __name__ == "__main__":
     whisper_sys.run_files(
         [
             f"{path}/clinic/primary.wav",
+            f"{path}/care/occupational.wav",
+            f"{path}/misc/return.wav",
             f"{path}/care/specialist.wav",
             f"{path}/specialty/orthodontist.wav",
             f"{path}/form/remote.wav",
