@@ -1,27 +1,46 @@
+import random
 from collections import OrderedDict
 
 import LinearDialogue
-# todo: Rethink the below. Do I want to hard-code this, or read contents.json?
-# CATEGORIES = OrderedDict([
-#     ("clinic", {"primary", "secondary"}),
-#     ("care", {"occupational", "primary", "specialist"}),
-#     ("specialty"),
-#     "form",
-#     "date"])
-# MISC_CHOICES = {"invalid.wav", }
+import os
+import json
+
+
+ROOT_PATH = "audio/subjects/"
+
+def generate_audio_data(directory: str):
+    audio_data = {}
+
+    for folder_name in os.listdir(directory):
+        folder_path = os.path.join(directory, folder_name)
+        if os.path.isdir(folder_path):
+            contents_file = os.path.join(folder_path, "contents.json")
+            if os.path.exists(contents_file):
+                with open(contents_file, "r") as f:
+                    contents_data = json.load(f)
+                audio_data[folder_name] = contents_data
+
+    return audio_data
+
+def generate_audio_path(subject: str, category: str, audio_data):
+    path = ROOT_PATH + subject
+    file_name = random.choice(list(audio_data[category].keys()))
+    return f"{path}/{category}/{file_name}"
+
+def generate_audio_paths(subject: str, audio_data, nodes: list[str]):
+    return [generate_audio_path(subject, node, audio_data) for node in nodes]
+
 
 if __name__ == '__main__':
     dial_system = LinearDialogue.generate()
-    path = "audio/subjects/marcin"
+    subject = "marcin"
+    path = ROOT_PATH + subject
+    audio_data = generate_audio_data(path)
+    nodes = ["clinic", "care", "specialty", "form", "date"]
     dial_system.run_files(
-        [
-            f"{path}/clinic/primary.wav",
-            f"{path}/misc/invalid.wav",
-            f"{path}/specialty/orthodontist.wav",
-            f"{path}/form/remote.wav",
-            f"{path}/date/tomorrow.wav",
-        ],
+        generate_audio_paths(subject, audio_data, nodes)
     )
+
 
     print(dial_system.interpret())
 

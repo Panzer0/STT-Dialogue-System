@@ -95,22 +95,22 @@ def generate():
     psychiatrist_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="specialty",
-        json_value="Psychiatrist",
-        keywords={"psychiatrist, psychiatrists, psychiatry"},
+        json_value="psychiatrist",
+        keywords={"psychiatrist", "psychiatrists", "psychiatry"},
         successor=form_node,
     )
     cardiologist_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="specialty",
-        json_value="Cardiologist",
-        keywords={"cardiologist, cardiologists, cardiology"},
+        json_value="cardiologist",
+        keywords={"cardiologist", "cardiologists", "cardiology"},
         successor=form_node,
     )
     laryngologist_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="specialty",
-        json_value="Laryngologist",
-        keywords={"laryngologist, laryngologists, laryngology"},
+        json_value="laryngologist",
+        keywords={"laryngologist", "laryngologists", "laryngology"},
         successor=form_node,
     )
     speciality_return_choice = DialogueChoice(
