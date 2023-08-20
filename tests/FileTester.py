@@ -24,9 +24,10 @@ class FileTester:
             for subject in self.subjects
         }
         self.dial_system = LinearDialogue.generate()
+        self.avg_time = self.run_random("marcin")
 
     def run_random(self, subject):
-        self.dial_system.run_files(self.subject_paths[subject])
+        return self.dial_system.run_files(self.subject_paths[subject])
 
     def get_subjects(self):
         return [subject for subject in os.listdir(self.root_path)]
@@ -89,6 +90,11 @@ class FileTester:
         for key in templates:
             if key in results:
                 vals.append(cer(templates[key].lower(), results[key].lower()))
+                #todo: vvv TEST CODE, REMOVE DOWN THE LINE vvv
+                # if cer(templates[key].lower(), results[key].lower()) > 0:
+                #     print(f"MISTAKE: '{templates[key].lower()}' | '{results[key].lower()}'")
+                #todo: ^^^ TEST CODE, REMOVE DOWN THE LINE ^^^
+
             else:
                 raise ValueError("Keys do not correspond")
         return sum(vals) / len(vals)
@@ -107,7 +113,6 @@ if __name__ == "__main__":
     tester = FileTester(
         ROOT_PATH, ["clinic", "care", "specialty", "form", "date"]
     )
-    tester.run_random("marcin")
     print(tester.dial_system.interpret())
     print(tester.dial_system.get_results()[1])
     print(tester.get_selected_pairs())
@@ -121,3 +126,4 @@ if __name__ == "__main__":
             tester.get_templates("marcin"), tester.get_results("marcin")
         )
     )
+    print(f"Average time: {tester.avg_time}")

@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 from core.recorder import record_audio
 
@@ -36,21 +37,33 @@ class DialogueSystem:
                 list(next_node.choices)[0].erase_all_json()
 
     def step(
-        self, record: bool, path: str, node: "DialogueNode"
-    ) -> "DialogueNode":
+            self, record: bool, path: str, node: "DialogueNode"
+    ) -> tuple["DialogueNode", float]:
         print(node)
+
         if record:
             record_audio(5, 16_000, path)
-        answer = self.stt_client.transcribe(path)
-        print(f"Answer is {answer}")
-        return node.advance(answer)
 
-    def run_files(self, paths: list[str]) -> None:
+        start_time = time.time()
+        answer = self.stt_client.transcribe(path)
+        end_time = time.time()
+        transcribe_time = end_time - start_time
+
+        print(f"Answer is `{answer}` with time {transcribe_time}")
+
+        return node.advance(answer), transcribe_time
+
+    def run_files(self, paths: list[str]) -> float:
         curr_node = self.start_point
+        time_sum = 0
+        node_count = 0
         for path in paths:
-            new_node = self.step(False, path, curr_node)
+            step_results = self.step(False, path, curr_node)
+            new_node = step_results[0]
+            time_sum += step_results[1]
+            node_count += 1
             if not new_node:
-                return
+                return time_sum / node_count
             else:
                 self.__adjust_predecessors(curr_node, new_node)
             curr_node = new_node
@@ -58,7 +71,7 @@ class DialogueSystem:
     def run_record(self, path: str) -> None:
         curr_node = self.start_point
         while curr_node:
-            new_node = self.step(True, path, curr_node)
+            new_node = self.step(True, path, curr_node)[0]
             if new_node:
                 self.__adjust_predecessors(curr_node, new_node)
             curr_node = new_node
