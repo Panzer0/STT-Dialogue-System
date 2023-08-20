@@ -27,9 +27,7 @@ def generate():
         keywords=RETURN_KEYWORDS,
     )
     date_default_choice = DialogueChoice(
-        json_path=JSON_PATH,
-        json_key="date",
-        json_value=DEFAULT_VAL
+        json_path=JSON_PATH, json_key="date", json_value=DEFAULT_VAL
     )
     date_prompt = "When would you like to schedule the appointment for?"
     date_choices = {date_valid_choice, date_return_choice}
@@ -59,13 +57,13 @@ def generate():
         json_key="form",
         json_value=RETURN_VAL,
         keywords=RETURN_KEYWORDS,
-        successor=date_node
+        successor=date_node,
     )
     form_default_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="form",
         json_value=DEFAULT_VAL,
-        successor=date_node
+        successor=date_node,
     )
 
     form_prompt = (
@@ -118,13 +116,13 @@ def generate():
         json_key="specialty",
         json_value=RETURN_VAL,
         keywords=RETURN_KEYWORDS,
-        successor=form_node
+        successor=form_node,
     )
     specialty_default_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="specialty",
         json_value=DEFAULT_VAL,
-        successor=form_node
+        successor=form_node,
     )
     specialist_prompt = (
         "What specialist would you like to make an appointment with?\n"
@@ -136,12 +134,12 @@ def generate():
         psychiatrist_choice,
         cardiologist_choice,
         laryngologist_choice,
-        speciality_return_choice
+        speciality_return_choice,
     }
     specialist_node = DialogueNode(
         specialist_choices,
         prompt=specialist_prompt,
-        default_choice=specialty_default_choice
+        default_choice=specialty_default_choice,
     )
 
     ## Care choice declarations
@@ -177,19 +175,24 @@ def generate():
         json_key="care",
         json_value=RETURN_VAL,
         keywords=RETURN_KEYWORDS,
-        successor=specialist_node
+        successor=specialist_node,
     )
     care_default_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="care",
         json_value=DEFAULT_VAL,
-        successor=specialist_node
+        successor=specialist_node,
     )
     care_prompt = (
         "What sort of physician would you like to make an appointment with?\n"
         "(Primary/special/occupational care)"
     )
-    care_choices = {specialist_choice, occupational_choice, primary_choice, care_return_choice}
+    care_choices = {
+        specialist_choice,
+        occupational_choice,
+        primary_choice,
+        care_return_choice,
+    }
     care_node = DialogueNode(
         care_choices, prompt=care_prompt, default_choice=care_default_choice
     )
@@ -214,27 +217,31 @@ def generate():
         json_key="clinic",
         json_value=RETURN_VAL,
         keywords=RETURN_KEYWORDS,
-        successor=care_node
+        successor=care_node,
     )
     clinic_default_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="clinic",
         json_value=DEFAULT_VAL,
-        successor=care_node
+        successor=care_node,
     )
     clinic_prompt = (
         "Which clinic are you interested in?\n"
         "(Primary at Park Street / Secondary at Yellow Street)"
     )
-    clinic_choices = {primary_clinic_choice, secondary_clinic_choice, clinic_return_choice}
+    clinic_choices = {
+        primary_clinic_choice,
+        secondary_clinic_choice,
+        clinic_return_choice,
+    }
     clinic_node = DialogueNode(
-        clinic_choices, default_choice=clinic_default_choice, prompt=clinic_prompt
+        clinic_choices,
+        default_choice=clinic_default_choice,
+        prompt=clinic_prompt,
     )
-
 
     # Dialogue system setup
     whisper_client = WhisperClient("small.en")
     whisper_sys = DialogueSystem(JSON_PATH, clinic_node, whisper_client)
     return whisper_sys
     # whisper_sys.run_record("temp_audio.wav")
-
