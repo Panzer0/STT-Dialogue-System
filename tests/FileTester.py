@@ -16,7 +16,7 @@ class FileTester:
         self.root_path = root_path
         self.subjects = self.get_subjects()
         self.audio_lib = {subject: self.generate_audio_data(subject) for subject in self.subjects}
-        self.subject_paths = {subject:self.__generate_audio_paths(subject, self.audio_lib, node_names) for subject in self.subjects}
+        self.subject_paths = {subject:self.__generate_audio_paths(subject, self.audio_lib[subject], node_names) for subject in self.subjects}
         self.dial_system = LinearDialogue.generate()
 
 
@@ -51,15 +51,47 @@ class FileTester:
     def __generate_audio_paths(self, subject: str, audio_data, nodes: list[str]):
         return [self.__generate_audio_path(subject, node, audio_data) for node in nodes]
 
+    def __interpret_path(self, path):
+        components = path.split('/')
+        return components[-2], components[-1]
+
+    #todo: rename
+    def get_selected_pairs(self):
+        return {subject: [self.__interpret_path(path) for path in self.subject_paths[subject]] for subject in self.subjects}
+
+    def get_templates(self, subject):
+        return {pair[0]: self.audio_lib[subject][pair[0]][pair[1]] for pair in self.get_selected_pairs()[subject]}
+
+    def get_results(self, subject):
+        return {pair[0]: self.dial_system.get_results()[1][pair[0]] for pair in self.get_selected_pairs()[subject]}
+
     def calc_total_cer(self, templates, results):
         vals = []
-        for template, result in zip(templates, results):
-            vals.append(cer(template, result))
-        return vals
+        for key in templates:
+            if key in results:
+                vals.append(cer(templates[key].lower(), results[key].lower()))
+            else:
+                raise ValueError("Keys do not correspond")
+        return sum(vals) / len(vals)
+
+    def calc_total_wer(self, templates, results):
+        vals = []
+        for key in templates:
+            if key in results:
+                vals.append(wer(templates[key].lower(), results[key].lower()))
+            else:
+                raise ValueError("Keys do not correspond")
+        return sum(vals) / len(vals)
 
 
 if __name__ == '__main__':
     tester = FileTester(ROOT_PATH, ["clinic", "care", "specialty", "form", "date"])
+    tester.run_random("marcin")
+    print(tester.dial_system.interpret())
+    print(tester.dial_system.get_results()[1])
+    print(tester.get_selected_pairs())
+    print(tester.calc_total_cer(tester.get_templates("marcin"), tester.get_results("marcin")))
+    print(tester.calc_total_wer(tester.get_templates("marcin"), tester.get_results("marcin")))
 
 
     # dial_system = LinearDialogue.generate()
