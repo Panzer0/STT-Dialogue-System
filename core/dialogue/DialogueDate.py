@@ -22,10 +22,10 @@ def contains_word(text: str, word: str) -> None:
     return re.search(r"\b" + word + r"\b", text)
 
 
-def interpret_date(date_string: str):
-    now = datetime.now()
+
+def interpret_date(date_string: str, source_time=datetime.now()):
     cal = pdt.Calendar()
-    return cal.parseDT(date_string, sourceTime=now)
+    return cal.parseDT(date_string, sourceTime=source_time)
 
 
 def generate_verbal_path(path):

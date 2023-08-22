@@ -101,7 +101,13 @@ def generate():
         json_path=JSON_PATH,
         json_key="specialty",
         json_value="cardiologist",
-        keywords={"cardiologist", "cardiologists", "cardiology", "heart", "hearts"},
+        keywords={
+            "cardiologist",
+            "cardiologists",
+            "cardiology",
+            "heart",
+            "hearts",
+        },
         successor=form_node,
     )
     laryngologist_choice = DialogueChoice(
