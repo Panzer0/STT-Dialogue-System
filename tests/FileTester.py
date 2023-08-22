@@ -8,9 +8,16 @@ from jiwer import wer, cer
 from core.dialogue.DialogueDate import interpret_date
 import parsedatetime as pdt
 
+from core.tts_clients.Coqui.CoquiClient import CoquiClient
+from core.tts_clients.SpeechBrain.SBClient import SBClient
+from core.tts_clients.Whisper.WhisperClient import WhisperClient
 
 ROOT_PATH = "audio/subjects/"
 NODE_NAMES = ["clinic", "care", "specialty", "form", "date"]
+
+COQUI = CoquiClient("Coqui/model.tflite", "Coqui/huge-vocabulary.scorer")
+WHISPER = WhisperClient("small.en")
+SB = SBClient("speechbrain/asr-transformer-transformerlm-librispeech")
 
 
 def sum_dicts(dict1: dict, dict2: dict) -> dict:
@@ -45,8 +52,8 @@ class FileTester:
             for subject in self.subjects
         }
 
-    def run_subject(self, subject: str) -> dict:
-        dial_system = LinearDialogue.generate()
+    def run_subject(self, subject: str, client) -> dict:
+        dial_system = LinearDialogue.generate(client)
         avg_time = dial_system.run_files(self.subject_paths[subject])
         templates = self.get_templates(subject)
         results = self.get_results_verbal(subject, dial_system)
@@ -60,10 +67,10 @@ class FileTester:
             "avg_cher": avg_cher,
         }
 
-    def run_total(self):
+    def run_total(self, client):
         totals = {"avg_time": 0, "avg_cer": 0, "avg_wer": 0, "avg_cher": 0}
         for subject in self.subjects:
-            totals = sum_dicts(totals, self.run_subject(subject))
+            totals = sum_dicts(totals, self.run_subject(subject, client))
         return divide_dict(totals, len(self.subjects))
 
     def get_subjects(self):
@@ -176,4 +183,4 @@ class FileTester:
 
 if __name__ == "__main__":
     tester = FileTester(ROOT_PATH, NODE_NAMES)
-    print(tester.run_total())
+    print(tester.run_total(COQUI))

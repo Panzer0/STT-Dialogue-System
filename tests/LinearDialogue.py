@@ -13,7 +13,7 @@ RETURN_VAL = "-RETURN-"
 DEFAULT_VAL = "-DEFAULT-"
 
 # In this DialogueSystem, all choices lead to the same results.
-def generate():
+def generate(client):
     # Dialogue system structure setup
     ## Date choice declarations
     date_valid_choice = DialogueDate(
@@ -247,7 +247,6 @@ def generate():
     )
 
     # Dialogue system setup
-    whisper_client = WhisperClient("small.en")
-    whisper_sys = DialogueSystem(JSON_PATH, clinic_node, whisper_client)
+    whisper_sys = DialogueSystem(JSON_PATH, clinic_node, client)
     return whisper_sys
     # whisper_sys.run_record("temp_audio.wav")
