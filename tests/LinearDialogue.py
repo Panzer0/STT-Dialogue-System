@@ -80,28 +80,28 @@ def generate():
         json_path=JSON_PATH,
         json_key="specialty",
         json_value="orthodontist",
-        keywords={"orthodontist", "dentist", "dentists"},
+        keywords={"orthodontist", "dentist", "dentists", "teeth", "tooth"},
         successor=form_node,
     )
     oculist_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="specialty",
         json_value="oculist",
-        keywords={"oculist", "oculists"},
+        keywords={"oculist", "oculists", "eye", "eyes"},
         successor=form_node,
     )
     psychiatrist_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="specialty",
         json_value="psychiatrist",
-        keywords={"psychiatrist", "psychiatrists", "psychiatry"},
+        keywords={"psychiatrist", "psychiatrists", "psychiatry", "mental"},
         successor=form_node,
     )
     cardiologist_choice = DialogueChoice(
         json_path=JSON_PATH,
         json_key="specialty",
         json_value="cardiologist",
-        keywords={"cardiologist", "cardiologists", "cardiology"},
+        keywords={"cardiologist", "cardiologists", "cardiology", "heart", "hearts"},
         successor=form_node,
     )
     laryngologist_choice = DialogueChoice(

@@ -7,6 +7,7 @@ from jiwer import wer, cer
 
 ROOT_PATH = "audio/subjects/"
 
+SUBJECT = "norbert"
 
 class FileTester:
     # todo: Add tts_client argument
@@ -24,7 +25,7 @@ class FileTester:
             for subject in self.subjects
         }
         self.dial_system = LinearDialogue.generate()
-        self.avg_time = self.run_random("marcin")
+        self.avg_time = self.run_random(SUBJECT)
 
     def run_random(self, subject):
         return self.dial_system.run_files(self.subject_paths[subject])
@@ -118,12 +119,12 @@ if __name__ == "__main__":
     print(tester.get_selected_pairs())
     print(
         tester.calc_total_cer(
-            tester.get_templates("marcin"), tester.get_results("marcin")
+            tester.get_templates(SUBJECT), tester.get_results(SUBJECT)
         )
     )
     print(
         tester.calc_total_wer(
-            tester.get_templates("marcin"), tester.get_results("marcin")
+            tester.get_templates(SUBJECT), tester.get_results(SUBJECT)
         )
     )
     print(f"Average time: {tester.avg_time}")
