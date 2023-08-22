@@ -64,8 +64,7 @@ class DialogueSystem:
             node_count += 1
             if not new_node:
                 return time_sum / node_count
-            else:
-                self.__adjust_predecessors(curr_node, new_node)
+            self.__adjust_predecessors(curr_node, new_node)
             curr_node = new_node
 
     def run_record(self, path: str) -> None:
