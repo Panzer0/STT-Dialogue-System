@@ -45,7 +45,7 @@ class DialogueSystem:
             record_audio(5, 16_000, path)
 
         start_time = time.time()
-        answer = self.stt_client.transcribe(path)
+        answer = self.stt_client.transcribe(path).strip()
         end_time = time.time()
         transcribe_time = end_time - start_time
 

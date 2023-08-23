@@ -25,7 +25,8 @@ def contains_word(text: str, word: str) -> None:
 
 def interpret_date(date_string: str, source_time=datetime.now()):
     cal = pdt.Calendar()
-    return cal.parseDT(date_string, sourceTime=source_time)
+    adjusted_date = replace_verbal_numbers(date_string)
+    return cal.parseDT(adjusted_date, sourceTime=source_time)
 
 
 def generate_verbal_path(path):
@@ -34,6 +35,35 @@ def generate_verbal_path(path):
     new_filename = f"{name}_verbal{extension}"
     new_path = os.path.join(directory, new_filename)
     return new_path
+
+
+NUMBER_MAP = {
+    "first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5,
+    "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9, "tenth": 10,
+    "eleventh": 11, "twelfth": 12, "thirteenth": 13, "fourteenth": 14,
+    "fifteenth": 15,
+    "sixteenth": 16, "seventeenth": 17, "eighteenth": 18, "nineteenth": 19,
+    "twentieth": 20,
+    "twenty-first": 21, "twenty-second": 22, "twenty-third": 23,
+    "twenty-fourth": 24, "twenty-fifth": 25,
+    "twenty-sixth": 26, "twenty-seventh": 27, "twenty-eighth": 28,
+    "twenty-ninth": 29, "thirtieth": 30, "thirty-first": 31
+}
+
+
+def verbal_to_number(verbal_number: str, number_map = NUMBER_MAP):
+    if verbal_number in number_map:
+        return str(number_map[verbal_number])
+    else:
+        return verbal_number
+
+
+def replace_verbal_numbers(input_string: str, number_map = NUMBER_MAP):
+    words = input_string.split()
+    for i in range(len(words)):
+        if words[i].lower() in number_map:
+            words[i] = verbal_to_number(words[i].lower())
+    return ' '.join(words)
 
 
 class DialogueDate:
@@ -113,4 +143,4 @@ class DialogueDate:
 
 
 if __name__ == "__main__":
-    print(interpret_date("How about in a week?")[0])
+    print(interpret_date("Let's schedule it for August 2")[0])
