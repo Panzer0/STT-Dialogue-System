@@ -4,12 +4,14 @@ import time
 
 from core.recorder import record_audio
 
+
 def generate_verbal_path(path):
     directory, filename = os.path.split(path)
     name, extension = os.path.splitext(filename)
     new_filename = f"{name}_verbal{extension}"
     new_path = os.path.join(directory, new_filename)
     return new_path
+
 
 class DialogueSystem:
     def __init__(self, json_path: str, start_point: "DialogueNode", stt_client):
@@ -37,7 +39,7 @@ class DialogueSystem:
                 list(next_node.choices)[0].erase_all_json()
 
     def step(
-            self, record: bool, path: str, node: "DialogueNode"
+        self, record: bool, path: str, node: "DialogueNode"
     ) -> tuple["DialogueNode", float]:
         print(node)
 
@@ -103,5 +105,6 @@ class DialogueSystem:
         with open(self.json_path_verbal, "r") as file_verbal:
             data_verbal = json.load(file_verbal)
         return data, data_verbal
+
 
 # TODO: Fix null recording bug!

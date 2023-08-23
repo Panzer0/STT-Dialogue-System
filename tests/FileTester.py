@@ -143,7 +143,9 @@ class FileTester:
                 vals.append(cer(templates[key].lower(), results[key].lower()))
                 # todo: vvv TEST CODE, REMOVE DOWN THE LINE vvv
                 if cer(templates[key].lower(), results[key].lower()) > 0:
-                    print(f"MISTAKE: '{templates[key].lower()}' | '{results[key].lower()}'")
+                    print(
+                        f"MISTAKE: '{templates[key].lower()}' | '{results[key].lower()}'"
+                    )
                 # todo: ^^^ TEST CODE, REMOVE DOWN THE LINE ^^^
 
             else:
