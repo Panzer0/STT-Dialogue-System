@@ -15,7 +15,7 @@ from core.tts_clients.Whisper.WhisperClient import WhisperClient
 ROOT_PATH = "audio/subjects/"
 NODE_NAMES = ["clinic", "care", "specialty", "form", "date"]
 
-# COQUI = CoquiClient("Coqui/model.tflite", "Coqui/huge-vocabulary.scorer")
+COQUI = CoquiClient("core/tts_clients/Coqui/model.tflite", "core/tts_clients/Coqui/huge-vocabulary.scorer")
 WHISPER = WhisperClient("small.en")
 SB = SBClient("speechbrain/asr-transformer-transformerlm-librispeech")
 
@@ -185,4 +185,4 @@ class FileTester:
 
 if __name__ == "__main__":
     tester = FileTester(ROOT_PATH, NODE_NAMES)
-    print(tester.run_total(WHISPER))
+    print(tester.run_total(COQUI))

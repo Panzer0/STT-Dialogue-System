@@ -21,7 +21,7 @@ class CoquiClient:
         if scorer:
             self.model.enableExternalScorer(scorer)
 
-    def convert_samplerate(audio_path, desired_sample_rate):
+    def convert_samplerate(self, audio_path, desired_sample_rate):
         sox_cmd = "sox {} --type raw --bits 16 --channels 1 --rate {} --encoding signed-integer --endian little --compression 0.0 --no-dither - ".format(
             quote(audio_path), desired_sample_rate
         )
@@ -34,6 +34,7 @@ class CoquiClient:
                 "SoX returned non-zero status: {}".format(e.stderr)
             )
         except OSError as e:
+            print(f"Audio path is {audio_path}")
             raise OSError(
                 e.errno,
                 "SoX not found, use {}hz files or install it: {}".format(
@@ -55,7 +56,7 @@ class CoquiClient:
                 ),
                 file=sys.stderr,
             )
-            fs_new, audio = convert_samplerate(audio, desired_sample_rate)
+            fs_new, audio = self.convert_samplerate(audio, desired_sample_rate)
         else:
             audio = np.frombuffer(fin.readframes(fin.getnframes()), np.int16)
 
