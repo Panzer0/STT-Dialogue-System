@@ -1,6 +1,7 @@
 import argparse
 import json
 import shlex
+import string
 import subprocess
 import sys
 import wave
@@ -44,6 +45,13 @@ class CoquiClient:
 
         return desired_sample_rate, np.frombuffer(output, np.int16)
 
+
+    def adjust_text(self, text: str) -> str:
+        punctuation = string.punctuation.replace("'", "")
+        cleaned_text = text.translate(str.maketrans(punctuation, " " * len(punctuation))).lower()
+        pruned_text = ' '.join(cleaned_text.split())
+        return pruned_text
+
     def transcribe(self, audio: str) -> str:
         desired_sample_rate = self.model.sampleRate()
 
@@ -62,4 +70,4 @@ class CoquiClient:
 
         fin.close()
 
-        return self.model.stt(audio)
+        return self.adjust_text(self.model.stt(audio))

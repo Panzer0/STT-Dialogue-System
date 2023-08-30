@@ -70,6 +70,7 @@ class FileTester:
     def run_total(self, client):
         totals = {"avg_time": 0, "avg_cer": 0, "avg_wer": 0, "avg_cher": 0}
         for subject in self.subjects:
+            print(f"Subject: {subject.upper()}")
             totals = sum_dicts(totals, self.run_subject(subject, client))
         return divide_dict(totals, len(self.subjects))
 
@@ -185,4 +186,4 @@ class FileTester:
 
 if __name__ == "__main__":
     tester = FileTester(ROOT_PATH, NODE_NAMES)
-    print(tester.run_total(COQUI))
+    print(tester.run_total(WHISPER))

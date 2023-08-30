@@ -3,7 +3,7 @@ import sys
 import os
 import glob
 
-SUPPORTED_FORMATS = ["mp3", "ogg", "wav", "flac", "m4a", "aac"]
+SUPPORTED_FORMATS = ["mp3", "ogg", "flac", "m4a", "aac"]
 
 
 def convert_audio(input_path, output_path):

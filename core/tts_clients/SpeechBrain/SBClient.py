@@ -13,7 +13,9 @@ class SBClient:
 
     def adjust_text(self, text: str) -> str:
         punctuation = string.punctuation.replace("'", "")
-        return text.translate(str.maketrans("", "", punctuation)).lower()
+        cleaned_text = text.translate(str.maketrans(punctuation, " " * len(punctuation))).lower()
+        pruned_text = ' '.join(cleaned_text.split())
+        return pruned_text
 
     def transcribe(self, audio: str) -> str:
         return self.adjust_text(self.model.transcribe_file(audio))
