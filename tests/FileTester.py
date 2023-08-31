@@ -185,5 +185,11 @@ class FileTester:
 
 
 if __name__ == "__main__":
-    tester = FileTester(ROOT_PATH, NODE_NAMES)
-    print(tester.run_total(WHISPER))
+    models = [COQUI, WHISPER, SB]
+    results = {}
+    model_names = ["Coqui", "Whisper", "SpeechBrain"]
+    for model_data in zip(models, model_names):
+        tester = FileTester(ROOT_PATH, NODE_NAMES)
+        results[model_data[1]] = tester.run_total(model_data[0])
+    for item in results.items():
+        print(f"\n{item[0]}: {item[1]}")
