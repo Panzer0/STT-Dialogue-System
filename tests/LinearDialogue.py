@@ -247,6 +247,5 @@ def generate(client):
     )
 
     # Dialogue system setup
-    whisper_sys = DialogueSystem(JSON_PATH, clinic_node, client)
-    return whisper_sys
-    # whisper_sys.run_record("temp_audio.wav")
+    dial_sys = DialogueSystem(JSON_PATH, clinic_node, client)
+    return dial_sys
