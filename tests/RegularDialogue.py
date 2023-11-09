@@ -7,9 +7,11 @@ from core.dialogue.DialogueSystem import DialogueSystem
 from core.tts_clients.Whisper.WhisperClient import WhisperClient
 
 
-RETURN_KEYWORDS = {"return", "cancel", "back"}
 
-if __name__ == "__main__":
+RETURN_KEYWORDS = {"return", "cancel", "back"}
+JSON_PATH = "results.json"
+
+def generate(client):
     # Dialogue system structure setup
     ## Date choice declarations
     date_choice = DialogueDate(
@@ -164,30 +166,5 @@ if __name__ == "__main__":
     )
 
     # Dialogue system setup
-    whisper_client = WhisperClient("small.en")
-    whisper_sys = DialogueSystem("results.json", clinic_node, whisper_client)
-
-    # whisper_sys.run_record("temp_audio.wav")
-
-    path = "audio/subjects/marcin"
-    whisper_sys.run_files(
-        [
-            f"{path}/clinic/primary.wav",
-            f"{path}/care/occupational.wav",
-            f"{path}/misc/return.wav",
-            f"{path}/care/specialist.wav",
-            f"{path}/specialty/orthodontist.wav",
-            f"{path}/form/remote.wav",
-            f"{path}/date/tomorrow.wav",
-        ],
-    )
-
-    print(whisper_sys.interpret())
-
-    reference = "give me a specialist"
-    hypothesis = "give me a special list"
-
-    cer_val = cer(reference, hypothesis)
-    wer_val = wer(reference, hypothesis)
-
-    print(f"cer: {cer_val}\n" f"wer: {wer_val}")
+    dial_sys = DialogueSystem(JSON_PATH, clinic_node, client)
+    return dial_sys

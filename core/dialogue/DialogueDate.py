@@ -22,7 +22,9 @@ def contains_word(text: str, word: str) -> None:
     return re.search(r"\b" + word + r"\b", text)
 
 
-def interpret_date(date_string: str, source_time=datetime.now()):
+def interpret_date(
+    date_string: str, source_time: datetime = datetime.now()
+) -> datetime:
     cal = pdt.Calendar()
     adjusted_date = replace_verbal_numbers(date_string)
     return cal.parseDT(adjusted_date, sourceTime=source_time)
@@ -36,7 +38,7 @@ def generate_verbal_path(path):
     return new_path
 
 
-NUMBER_MAP = {
+NUMBER_DICT = {
     "first": 1,
     "second": 2,
     "third": 3,
@@ -71,17 +73,17 @@ NUMBER_MAP = {
 }
 
 
-def verbal_to_number(verbal_number: str, number_map=NUMBER_MAP):
-    if verbal_number in number_map:
-        return str(number_map[verbal_number])
+def verbal_to_number(verbal_number: str, number_dict=NUMBER_DICT) -> str:
+    if verbal_number in number_dict:
+        return str(number_dict[verbal_number])
     else:
         return verbal_number
 
 
-def replace_verbal_numbers(input_string: str, number_map=NUMBER_MAP):
+def replace_verbal_numbers(input_string: str, number_dict=NUMBER_DICT) -> str:
     words = input_string.split()
     for i in range(len(words)):
-        if words[i].lower() in number_map:
+        if words[i].lower() in number_dict:
             words[i] = verbal_to_number(words[i].lower())
     return " ".join(words)
 

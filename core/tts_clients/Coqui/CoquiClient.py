@@ -58,13 +58,7 @@ class CoquiClient:
         fin = wave.open(audio, "rb")
         fs_orig = fin.getframerate()
         if fs_orig != desired_sample_rate:
-            print(
-                "Warning: original sample rate ({}) is different than {}hz. Resampling might produce erratic speech recognition.".format(
-                    fs_orig, desired_sample_rate
-                ),
-                file=sys.stderr,
-            )
-            fs_new, audio = self.convert_samplerate(audio, desired_sample_rate)
+            _, audio = self.convert_samplerate(audio, desired_sample_rate)
         else:
             audio = np.frombuffer(fin.readframes(fin.getnframes()), np.int16)
 

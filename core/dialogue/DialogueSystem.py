@@ -5,7 +5,7 @@ import time
 from core.recorder import record_audio
 
 
-def generate_verbal_path(path):
+def generate_verbal_path(path: str) -> str:
     directory, filename = os.path.split(path)
     name, extension = os.path.splitext(filename)
     new_filename = f"{name}_verbal{extension}"
@@ -25,7 +25,7 @@ class DialogueSystem:
 
     def __adjust_predecessors(
         self, current_node: "DialogueNode", next_node: "DialogueNode"
-    ):
+    ) -> None:
         if next_node.back_choice:
             if next_node.back_choice.successor is None:
                 # This means we're threading forward
@@ -68,6 +68,9 @@ class DialogueSystem:
                 return time_sum / node_count
             self.__adjust_predecessors(curr_node, new_node)
             curr_node = new_node
+        if node_count == 0:
+            raise ValueError("Path list can't be empty.")
+        return time_sum / node_count
 
     def run_record(self, path: str) -> None:
         curr_node = self.start_point
@@ -82,22 +85,17 @@ class DialogueSystem:
     def interpret(self):
         with open(self.json_path, "r") as file:
             data = json.load(file)
-        # Check for obligatory fields
-        obligatory_fields = {"form", "care"}
-        for field in obligatory_fields:
-            if field not in data:
-                raise ValueError(
-                    f"Corrupt json data: Missing '{field}' parameter"
-                )
-        if data["care"] == "specialist" and "specialty" not in data:
-            raise ValueError(
-                f"Corrupt json data: Missing 'specialist' parameter"
-            )
 
-        result = ""
-        for key in data.keys():
-            result += f"{key}: {data[key]}\n"
-        return result
+        required_fields = {"form", "care"}
+        missing_fields = required_fields - set(data.keys())
+        if missing_fields:
+            raise ValueError(
+                f"Corrupt json data: Missing {missing_fields} parameter(s)")
+
+        if data.get("care") == "specialist" and "specialty" not in data:
+            raise ValueError("Corrupt json data: Missing 'specialty' parameter")
+
+        return "\n".join(f"{key}: {value}" for key, value in data.items())
 
     def get_results(self):
         with open(self.json_path, "r") as file:

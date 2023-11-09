@@ -4,7 +4,7 @@ import json
 from typing import Set
 
 
-def contains_word(text: str, word: str) -> None:
+def contains_word(text: str, word: str):
     """
     Check if a string contains a given word
 
@@ -18,7 +18,7 @@ def contains_word(text: str, word: str) -> None:
     return re.search(r"\b" + word + r"\b", text)
 
 
-def generate_verbal_path(path):
+def generate_verbal_path(path: str) -> str:
     directory, filename = os.path.split(path)
     name, extension = os.path.splitext(filename)
     new_filename = f"{name}_verbal{extension}"
@@ -56,7 +56,7 @@ class DialogueChoice:
         """
         return any(contains_word(text, word) for word in self.keywords)
 
-    def erase_json(self, json_path, json_key):
+    def erase_json(self, json_path: str, json_key: str) -> None:
         with open(json_path, "r+") as json_file:
             data = json.load(json_file)
             if json_key in data:
@@ -65,7 +65,7 @@ class DialogueChoice:
                 json_file.truncate()
                 json.dump(data, json_file, indent=4)
 
-    def erase_all_json(self):
+    def erase_all_json(self) -> None:
         if not (self.json_path and self.json_key and self.json_value):
             return
         try:
@@ -74,7 +74,7 @@ class DialogueChoice:
         except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
             print(f"An error occurred: {e}")
 
-    def __update_json(self, path, key, value):
+    def __update_json(self, path: str, key: str, value: str) -> None:
         try:
             with open(path, "r+") as json_file:
                 data = json.load(json_file)

@@ -11,6 +11,7 @@ def save_audio(recording, fs, filename):
     if recording is None:
         raise ValueError("No recording data found.")
 
+    # Probably unneeded
     recording = recording / np.max(np.abs(recording)) * MAX_SHORT_INT
     recording = recording.astype(np.int16)
 
