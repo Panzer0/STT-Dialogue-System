@@ -30,7 +30,7 @@ def convert_folder(input_folder, output_folder):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python script_name.py input_folder output_folder")
+        print("Usage: python audioConverter.py input_folder output_folder")
         sys.exit(1)
 
     input_folder = sys.argv[1]
