@@ -8,6 +8,7 @@ class WhisperClient:
         torch.cuda.init()
         print("CUDA STATUS: ", torch.cuda.is_available())
         self.model = whisper.load_model(model).to("cuda")
+        self.name = "Whisper"
 
     def adjust_text(self, text: str) -> str:
         punctuation = string.punctuation.replace("'", "")

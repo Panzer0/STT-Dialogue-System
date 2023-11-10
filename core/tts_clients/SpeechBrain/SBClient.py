@@ -10,6 +10,7 @@ class SBClient:
         self.model = EncoderDecoderASR.from_hparams(
             model, run_opts={"device": "cuda"}
         )
+        self.name = "SpeechBrain"
 
     def adjust_text(self, text: str) -> str:
         punctuation = string.punctuation.replace("'", "")

@@ -55,22 +55,27 @@ class DialogueSystem:
 
         return node.advance(answer), transcribe_time
 
-    def run_files(self, paths: list[str]) -> float:
+    def run_files(self, paths: list[str]) -> float | tuple[float, list[float]]:
         curr_node = self.start_point
         time_sum = 0
         node_count = 0
+        ## TODO: MAKE IT RETURN A LIST OR DICT OF RUNTIMES INSTEAD
+        ## TODO: (for the sake of Pandas)
+        runtimes = []
+
         for path in paths:
             step_results = self.step(False, path, curr_node)
             new_node = step_results[0]
             time_sum += step_results[1]
+            runtimes.append(step_results[1])
             node_count += 1
             if not new_node:
-                return time_sum / node_count
+                return time_sum / node_count, runtimes
             self.__adjust_predecessors(curr_node, new_node)
             curr_node = new_node
         if node_count == 0:
             raise ValueError("Path list can't be empty.")
-        return time_sum / node_count
+        return time_sum / node_count, runtimes
 
     def run_record(self, path: str) -> None:
         curr_node = self.start_point

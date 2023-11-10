@@ -18,6 +18,7 @@ except ImportError:
 class CoquiClient:
     def __init__(self, model, scorer="None"):
         self.model = Model(model)
+        self.name = "Coqui STT"
 
         if scorer:
             self.model.enableExternalScorer(scorer)
