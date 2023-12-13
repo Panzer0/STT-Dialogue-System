@@ -7,7 +7,7 @@ import queue
 MAX_SHORT_INT = 32767
 
 
-def save_audio(recording, fs, filename):
+def save_audio(recording, fs, filename) -> None:
     if recording is None:
         raise ValueError("No recording data found.")
 
@@ -22,13 +22,13 @@ def save_audio(recording, fs, filename):
         wf.writeframes(recording.tobytes())
 
 
-def record_audio_thread(q, duration, fs):
+def record_audio_thread(q, duration, fs) -> None:
     recording = sd.rec(duration, samplerate=fs, channels=1, dtype=np.int16)
     sd.wait()
     q.put(recording)
 
 
-def record_audio(length, fs, filename="recording.wav"):
+def record_audio(length, fs, filename="recording.wav") -> None:
     duration = int(length * fs)
     print("Initialising recorder...")
     try:

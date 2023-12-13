@@ -6,12 +6,12 @@ import glob
 SUPPORTED_FORMATS = ["mp3", "ogg", "flac", "m4a", "aac"]
 
 
-def convert_audio(input_path, output_path):
+def convert_audio(input_path, output_path) -> None:
     sound = AudioSegment.from_file(input_path)
     sound.export(output_path, format="wav")
 
 
-def convert_folder(input_folder, output_folder):
+def convert_folder(input_folder, output_folder) -> None:
     os.makedirs(output_folder, exist_ok=True)
 
     audio_files = [
