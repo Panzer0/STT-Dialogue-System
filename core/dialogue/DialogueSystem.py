@@ -55,27 +55,22 @@ class DialogueSystem:
 
         return node.advance(answer), transcribe_time
 
-    def run_files(self, paths: list[str]) -> float | tuple[float, list[float]]:
+    def run_files(self, paths: list[str]) -> list[float]:
         curr_node = self.start_point
-        time_sum = 0
-        node_count = 0
-        ## TODO: MAKE IT RETURN A LIST OR DICT OF RUNTIMES INSTEAD
-        ## TODO: (for the sake of Pandas)
         runtimes = []
 
+        if not paths:
+            raise ValueError("Path list can't be empty.")
+
         for path in paths:
-            step_results = self.step(False, path, curr_node)
-            new_node = step_results[0]
-            time_sum += step_results[1]
-            runtimes.append(step_results[1])
-            node_count += 1
+            new_node, runtime = self.step(False, path, curr_node)
+            runtimes.append(runtime)
             if not new_node:
-                return time_sum / node_count, runtimes
+                return runtimes
             self.__adjust_predecessors(curr_node, new_node)
             curr_node = new_node
-        if node_count == 0:
-            raise ValueError("Path list can't be empty.")
-        return time_sum / node_count, runtimes
+
+        return runtimes
 
     def run_record(self, path: str) -> None:
         curr_node = self.start_point
@@ -95,7 +90,8 @@ class DialogueSystem:
         missing_fields = required_fields - set(data.keys())
         if missing_fields:
             raise ValueError(
-                f"Corrupt json data: Missing {missing_fields} parameter(s)")
+                f"Corrupt json data: Missing {missing_fields} parameter(s)"
+            )
 
         if data.get("care") == "specialist" and "specialty" not in data:
             raise ValueError("Corrupt json data: Missing 'specialty' parameter")

@@ -64,20 +64,18 @@ class FileTester:
             'Runtime': []
         }
 
-    def run_subject(self, subject: str, client) -> dict:
+    def run_subject(self, subject: str, client) -> None:
         dial_system = LinearDialogue.generate(client)
-        avg_time, times = dial_system.run_files(self.subject_paths[subject])
+        times = dial_system.run_files(self.subject_paths[subject])
         templates = self.get_templates(subject)
         results = self.get_results_verbal(subject, dial_system)
-        avg_cer, cers = self.calc_avg_cer(templates, results)
-        avg_wer, wers = self.calc_avg_wer(templates, results)
-        avg_cher, chers = self.calc_cher(subject, dial_system)
-
-        # Pandas data
+        cers = self.calc_cers(templates, results)
+        wers = self.calc_wers(templates, results)
+        chers = self.calc_chers(subject, dial_system)
         nodes = [strip_path_ext(path) for path in self.subject_paths[subject]]
-        if not len(cers) == len(wers) == len(chers) == len(times):
-            print("I know something's very wrong")
-            raise AssertionError("It's just a trick of the light")
+
+        if not len(cers) == len(wers) == len(chers) == len(times) == len(nodes):
+            raise AssertionError("Inconsistent data count")
 
         self.out_data['Client'].extend([client.name] * len(times))
         self.out_data['Subject'].extend([subject] * len(times))
@@ -87,19 +85,10 @@ class FileTester:
         self.out_data['CHER'].extend(chers)
         self.out_data['Runtime'].extend(times)
 
-        return {
-            "avg_time": avg_time,
-            "avg_cer": avg_cer,
-            "avg_wer": avg_wer,
-            "avg_cher": avg_cher,
-        }
-
-    def run_total(self, client):
-        totals = {"avg_time": 0, "avg_cer": 0, "avg_wer": 0, "avg_cher": 0}
+    def run_total(self, client) -> None:
         for subject in self.subjects:
             print(f"Subject: {subject.upper()}")
-            totals = sum_dicts(totals, self.run_subject(subject, client))
-        return divide_dict(totals, len(self.subjects))
+            self.run_subject(subject, client)
 
     def get_subjects(self):
         return [subject for subject in os.listdir(self.root_path)]
@@ -164,25 +153,24 @@ class FileTester:
         }
 
     # character error rate
-    def calc_avg_cer(self, templates, results):
+    def calc_cers(self, templates, results):
         vals = []
         for key in templates:
             if key in results:
                 new_cer = cer(templates[key].lower(), results[key].lower())
                 vals.append(new_cer)
-                # todo: vvv TEST CODE, REMOVE DOWN THE LINE vvv
-                if new_cer > 0:
-                    print(
-                        f"MISTAKE: '{templates[key].lower()}' | '{results[key].lower()}'"
-                    )
-                # todo: ^^^ TEST CODE, REMOVE DOWN THE LINE ^^^
-
+                # # todo: vvv TEST CODE, REMOVE DOWN THE LINE vvv
+                # if new_cer > 0:
+                #     print(
+                #         f"MISTAKE: '{templates[key].lower()}' | '{results[key].lower()}'"
+                #     )
+                # # todo: ^^^ TEST CODE, REMOVE DOWN THE LINE ^^^
             else:
                 raise ValueError("Keys do not correspond")
-        return sum(vals) / len(vals), vals
+        return vals
 
     # word error rate
-    def calc_avg_wer(self, templates, results):
+    def calc_wers(self, templates, results):
         vals = []
         for key in templates:
             if key in results:
@@ -190,12 +178,11 @@ class FileTester:
                 vals.append(new_wer)
             else:
                 raise ValueError("Keys do not correspond")
-        return sum(vals) / len(vals), vals
+        return vals
 
     # choice error rate
-    def calc_cher(self, subject, dial_system):
+    def calc_chers(self, subject, dial_system):
         results = dial_system.get_results()
-        err_count = 0
         vals = []
 
         for node in results[0]:
@@ -207,38 +194,24 @@ class FileTester:
             else:
                 choice = results[0][node] + ".wav"
                 expected_choice = self.get_selected_choice(subject, node)
+            vals.append(0) if choice == expected_choice else vals.append(1)
 
-            if choice != expected_choice:
-                err_count += 1
-                vals.append(1)
-            else:
-                vals.append(0)
-
-        return err_count / len(results[0]), vals
+        return vals
 
 
 if __name__ == "__main__":
-    models = [COQUI, WHISPER, SB]
-    results = {}
-    model_names = ["Coqui", "Whisper", "SpeechBrain"]
+    clients = [COQUI, WHISPER, SB]
     dataframes = []
-    for model_data in zip(models, model_names):
+    for client in clients:
         tester = FileTester(ROOT_PATH, NODE_NAMES)
-        results[model_data[1]] = tester.run_total(model_data[0])
+        tester.run_total(client)
         dataframes.append(pd.DataFrame(tester.out_data))
-
-    for item in results.items():
-        print(f"\n{item[0]}: {item[1]}")
 
     for dataframe in dataframes:
         print(dataframe)
         print(dataframe.info())
 
     combined_df = pd.concat(dataframes, ignore_index=True)
-
-    print(combined_df.to_string())
-    print(combined_df.info())
-
     average_df = combined_df.groupby('Client').agg({
         'WER': 'mean',
         'CER': 'mean',
@@ -246,6 +219,4 @@ if __name__ == "__main__":
         'Runtime': 'mean'
     })
 
-
     print(average_df)
-    print(average_df.info())
